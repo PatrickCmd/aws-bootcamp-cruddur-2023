@@ -1,16 +1,17 @@
 # Week 0 — Billing and Architecture
 
-## Getting the AWS CLI Working
+## Required Homework/Tasks
+### Getting the AWS CLI Working
 
 After activating my AWS free tier account, I proceeded to make AWS CLI working both on my local machine environment and the gitpod environment following the steps below.
 
-### Install AWS CLI
+#### Install AWS CLI
 
-- Install the AWS CLI when my Gitpod enviroment lanuches.
-- Set AWS CLI to use partial autoprompt mode to make it easier to debug CLI commands.
-- The bash commands we are using are the same as the [AWS CLI Install Instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- I set to install the AWS CLI when my Gitpod enviroment lanuches.
+- I Set AWS CLI to use partial autoprompt mode to make it easier to debug CLI commands.
+- The bash commands I used are the same as the [AWS CLI Install Instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-Update my `.gitpod.yml` to include the following task.
+I updated my `.gitpod.yml` to include the following task.
 
 ```
 tasks:
@@ -25,7 +26,7 @@ tasks:
       cd $THEIA_WORKSPACE_ROOT
 ```
 
-Also ran the commands indivually to perform the install manually
+Also I ran the commands indivually to perform the install manually
 
 ```sh
 cd /workspace
@@ -35,18 +36,18 @@ sudo ./aws/install
 cd $THEIA_WORKSPACE_ROOT
 ```
 
-## Create a new User and Generate AWS Credentials
+### Create a new User and Generate AWS Credentials
 
 - Go to  (IAM Users Console](https://us-east-1.console.aws.amazon.com/iamv2/home?region=us-east-1#/users) and created a new user
-- Enable console access for the user
-- Create a new Admin Group and apply AdministratorAccess
-- Create the user and go find and click into the user
+- I enabled console access for the user
+- I created a new Admin Group and apply AdministratorAccess
+- I created the user and go find and click into the user
 - Click on Security Credentials and Create Access Key
 - Choose AWS CLI Access
 - Download the CSV with the credentials
 
-### Set Env Vars
-You can set these credentials for the current bash terminal
+#### Set Env Vars
+I set these credentials for the current bash terminal
 
 ```sh
 export AWS_ACCESS_KEY_ID="<YOUR_AWS_ACCESS_KEY_ID>"
@@ -62,7 +63,7 @@ export AWS_SECRET_ACCESS_KEY="Rw7Ah1X5fXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 export AWS_DEFAULT_REGION="us-east-1"
 ```
 
-You tell Gitpod to remember these credentials if you relaunch your workspaces
+You can tell Gitpod to remember these credentials if you relaunch your workspaces
 
 ```sh
 gp env AWS_ACCESS_KEY_ID="<YOUR_AWS_ACCESS_KEY_ID>"
@@ -78,7 +79,7 @@ gp env AWS_SECRET_ACCESS_KEY="Rw7Ah1X5fXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 gp env AWS_DEFAULT_REGION="us-east-1"
 ```
 
-Check that the AWS CLI is working and you are the expected user
+You can check that the AWS CLI is working and you are the expected user
 
 ```sh
 aws sts get-caller-identity
@@ -94,16 +95,16 @@ You should see something like this:
 }
 ```
 
-## Enable Billing
+### Enable Billing
 
-Turn on Billing Alerts to recieve alerts...
+To turn on Billing Alerts to recieve alerts, I followed the steps below.
 
 - In the Root Account go to the [Billing Page](https://console.aws.amazon.com/billing/)
 - Under `Billing Preferences` Choose `Receive Billing Alerts`
 - Save Preferences
 
-## Creating a Billing Alarm
-### Create SNS Topic
+### Creating a Billing Alarm
+#### Create SNS Topic
 - You need an SNS topic before you create an alarm.
 - The SNS topic is what will deliver us an alert when we get overbilled
 - See example at [aws sns create-topic](https://docs.aws.amazon.com/cli/latest/reference/sns/create-topic.html)
@@ -142,7 +143,9 @@ Check your email and confirm the subscription
 aws cloudwatch put-metric-alarm --cli-input-json file://aws/json/alarm_config.json
 ```
 
-## Create an AWS Budget
+![My Billing Alarm](assets/week-0/Biilling%20Alarm.png)
+
+### Create an AWS Budget
 
 See [aws budgets create-budget](https://docs.aws.amazon.com/cli/latest/reference/budgets/create-budget.html) for reference
 
@@ -170,3 +173,15 @@ aws budgets create-budget \
     --budget file://aws/json/budget.json \
     --notifications-with-subscribers file://aws/json/budget-notifications-with-subscribers.json
 ```
+
+
+Screen shoots of budgets I created in AWS, one of $5 using the AWS CLI and the other of $10 using the AWS console web UI. You can only have maximum of two budgets under the free-tier AWS account.
+
+![My AWS Bugdets](assets/week-0/Budgets.png)
+
+
+### Recreate Logical Architectural Deisgn
+
+![Cluddur Logical Diagram](assets/week-0/Cluddur%20Logical%20Diagram.png)
+
+[Link to Cluddur Logical Diagram](https://lucid.app/lucidchart/f7f6549f-8782-4b2e-bd8d-7426db11ebf8/edit?viewport_loc=-1369%2C-823%2C1600%2C867%2C0_0&invitationId=inv_8ab1fb6d-5a3a-450a-9c22-470ffb3cb5c7)
