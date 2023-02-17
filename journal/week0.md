@@ -185,3 +185,25 @@ Screen shoots of budgets I created in AWS, one of $5 using the AWS CLI and the o
 ![Cluddur Logical Diagram](assets/week-0/Cluddur%20Logical%20Diagram.png)
 
 [Link to Cluddur Logical Diagram](https://lucid.app/lucidchart/f7f6549f-8782-4b2e-bd8d-7426db11ebf8/edit?viewport_loc=-1369%2C-823%2C1600%2C867%2C0_0&invitationId=inv_8ab1fb6d-5a3a-450a-9c22-470ffb3cb5c7)
+
+
+## Homework Challenges
+
+### Review all the questions of each pillars in the Well Architected Tool
+
+- I went through the AWS well architected framework and reviewed the questions under the six pillars of the AWA tool to the best of my ability.
+
+
+![AWS WA TOOL](assets/week-0/aws_wa_tool.png)
+
+
+![AWS WA TOOL](assets/week-0/aws_wa_tool_2.png)
+
+
+### Create an architectural diagram the CI/CD logical pipeline 
+
+I referenced the [learn-cantrill-io-labs Cat pipeline](https://github.com/acantril/learn-cantrill-io-labs/tree/master/aws-codepipeline-catpipeline) to come up with CI/CD pipeline.
+
+![cruddur CI/CD pipeline](assets/week-0/Cruddur%20CI_CD%20Pipeline.png)
+
+[Link to my CI/CD pipeline](https://lucid.app/lucidchart/d622be13-3b0f-415c-8b90-4b4b12e5592b/edit?viewport_loc=-1105%2C-79%2C1579%2C867%2C0_0&invitationId=inv_00293ae4-1f48-4060-b370-555301bc7dc8)
