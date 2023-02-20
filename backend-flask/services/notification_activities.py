@@ -5,7 +5,7 @@ class NotificationActivities:
     results = [{
       'uuid': '68f126b0-1ceb-4a33-88be-d90fa7109eee',
       'handle':  'Patrick Cmd',
-      'message': 'I am a better progrrammer!',
+      'message': 'I am a better programmer!',
       'created_at': (now - timedelta(days=2)).isoformat(),
       'expires_at': (now + timedelta(days=5)).isoformat(),
       'likes_count': 5,
