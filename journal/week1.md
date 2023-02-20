@@ -45,3 +45,34 @@ docker push ${BACKEND_IMAGE_REMOTE}
 ![docker backend flask image push remote](assets/week-1/docker-images-backend-flask-push-remote.png)
 
 ![cruddur backend flask remote image](assets/week-1/cruddur-backend-flask-remote-image.png)
+
+### Build frontend container
+```sh
+cd frontend-react-js
+npm i
+cd ../
+docker build -t frontend-react-js ./frontend-react-js
+```
+
+![docker images frontend react build](assets/week-1/docker-images-frontend-react-build.png)
+
+![docker images frontend react local](assets/week-1/docker-images-frontend-react-local.png)
+
+### Tag and push frontend-react image to remote repository on docker hub
+I use the commands below to tag the frontend react image to my remote docker hub registry and push. I don't do docker login via CLI since I did the same in the above steps
+
+```sh
+REPOSITORY_NAME=cruddur-frontend-react-js
+DOCKER_HUB_USERNAME=patricktcmd
+PREFIX=${DOCKER_HUB_USERNAME}/${REPOSITORY_NAME}
+
+FRONTEND_IMAGE_LOCAL=frontend-react-js:latest
+FRONTEND_IMAGE_REMOTE=${PREFIX}:v01
+docker tag ${FRONTEND_IMAGE_LOCAL} ${FRONTEND_IMAGE_REMOTE}
+
+docker push ${FRONTEND_IMAGE_REMOTE}
+```
+
+![docker images frontend react push remote](assets/week-1/docker-images-frontend-react-push-remote.png)
+
+![docker images frontend react remote](assets/week-1/docker-images-frontend-react-remote.png)
