@@ -48,13 +48,14 @@ services:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
 
-volumes:
-  db:
-    driver: local
-
 # the name flag is a hack to change the default prepend folder
 # name when outputting the image names
 networks: 
   internal-network:
     driver: bridge
     name: cruddur
+
+
+volumes:
+  db:
+    driver: local
