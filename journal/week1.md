@@ -76,3 +76,62 @@ docker push ${FRONTEND_IMAGE_REMOTE}
 ![docker images frontend react push remote](assets/week-1/docker-images-frontend-react-push-remote.png)
 
 ![docker images frontend react remote](assets/week-1/docker-images-frontend-react-remote.png)
+
+
+## Install Docker on your local machine and get the same containers running outside of Gitpod / Codespaces
+
+I was able to have docker run on my local machine and run the image containers outside of Gitpod environment. I did change the URL environment variables `BACKEND_URL` and `FRONTEND_URL` to reflect the local urls
+
+```
+version: "3.8"
+services:
+  backend-flask:
+    environment:
+      FRONTEND_URL: "http://localhost:3000"
+      BACKEND_URL: "http://localhost:4567
+```
+
+```
+frontend-react-js:
+    environment:
+      REACT_APP_BACKEND_URL: "http://localhost:4567"
+```
+
+See full file [docker-compose.local.yml](../docker-compose.local.yml) at the root of project.
+
+```sh
+docker-compose -f docker-compose.local.yml up -d --build
+docker-compose ps -a
+```
+
+![docker desktop local images](assets/week-1/docker-desktop-local-images.png)
+
+![docker images local machine](assets/week-1/docker-images-local-machine.png)
+
+![docker images local machine ps](assets/week-1/docker-images-local-machine-ps.png)
+
+![frontend home](assets/week-1/frontend-home.png)
+
+![frontend logged in](assets/week-1/frontend-logged-in.png)
+
+![frontend notifications](assets/week-1/frontend-notifications.png)
+
+I could also access the postgres database on my local machine
+
+```sh
+docker-compose exec db psql --username=postgres
+```
+
+![docker postgres local machine](assets/week-1/docker-postgres-local-machine.png)
+
+I tested out dynamodb-local on my local machine and was working perfectly. See this [repo link for 00DaysOfCloud challenge-dynamodb-local](https://github.com/100DaysOfCloud/challenge-dynamodb-local) for the commands executed below in the screen shots
+
+![dynamodb local create table](assets/week-1/dynamodb-local-create-table.png)
+
+![dynamodb local create table](assets/week-1/dynamodb-local-create-table-output.png)
+
+![dynamodb local add table item](assets/week-1/dynamodb-local-add-item.png)
+
+![dynamodb local add table item](assets/week-1/dynamodb-local-add-item-output.png)
+
+![dynamodb local list table item](assets/week-1/dynamodb-local-list-table-items.png)
