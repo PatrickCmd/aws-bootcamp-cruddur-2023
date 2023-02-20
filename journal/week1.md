@@ -1,5 +1,9 @@
 # Week 1 — App Containerization
 
+## Homework Challenges
+
+I used the [organizer's repo](https://github.com/omenking/aws-bootcamp-cruddur-2023/blob/week-1/journal/week1.md) as a refernce for my homework challenges.
+
 ## Push and tag a images to DockerHub
 ### Build backend container
 ```sh
@@ -135,3 +139,50 @@ I tested out dynamodb-local on my local machine and was working perfectly. See t
 ![dynamodb local add table item](assets/week-1/dynamodb-local-add-item-output.png)
 
 ![dynamodb local list table item](assets/week-1/dynamodb-local-list-table-items.png)
+
+## Use multi-stage building for a Dockerfile build
+
+I was able to test out multi-stage build for a backend flask application with minimal failures. See the [backend-flask/Dockerfile.prod](../backend-flask/Dockerfile.prod) and [docker-compose.prod.yml](../docker-compose.prod.yml). I created duplicates for both `Dockerfile` and `docker-compose.yml` for demostration purposes.
+
+#### Resources used:
+- [Dockerizing Flask with Postgres, Gunicorn, and Nginx on testdriven.io](https://testdriven.io/blog/dockerizing-flask-with-postgres-gunicorn-and-nginx/#production-dockerfile)
+- [Docker multi-stage builds Testdriven.io](https://testdriven.io/tips/6ef63d0e-f3b6-41f3-8127-ca5f0a55c43f/)
+
+```sh
+docker build -f ./backend-flask/Dockerfile.prod -t backend-flask-prod ./backend-flask/
+```
+
+![docker backend multi-stage build](assets/week-1/docker-backend-multistage-build.png)
+![docker backend multi-stage build](assets/week-1/docker-backend-multistage-build-02.png)
+
+Run backend multistage build containers with `docker compose`
+
+```sh
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Backend endpoint worked fine.
+
+![backend endpoint for multistage build](assets/week-1/backend-endpoint-multistage%20build.png)
+
+I did get a CORS on the frontend and at this moment I was still troubleshooting why the error.
+
+![CORS error on the frontend](assets/week-1/cors-error-frontend.png)
+
+Tag and pushed the `multi-stage build` as `backend-flask-prod` to  docker hub repository
+
+```sh
+REPOSITORY_NAME=cruddur-backend-flask-prod
+DOCKER_HUB_USERNAME=patricktcmd
+PREFIX=${DOCKER_HUB_USERNAME}/${REPOSITORY_NAME}
+
+BACKEND_IMAGE_LOCAL=backend-flask-prod:latest
+BACKEND_IMAGE_REMOTE=${PREFIX}:v01
+docker tag ${BACKEND_IMAGE_LOCAL} ${BACKEND_IMAGE_REMOTE}
+
+echo $DOCKER_ACCESS_TOKEN | docker login -u patricktcmd --password-stdin
+
+docker push ${BACKEND_IMAGE_REMOTE}
+```
+
+![backend flask prod](assets/week-1/backend-flask-prod.png)
