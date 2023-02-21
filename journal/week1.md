@@ -202,3 +202,17 @@ healthcheck:
 ```
 
 The healthcheck section specifies a test command, interval, timeout, and number of retries. The db service uses `pg_isready` to check if the Postgres server is accepting connections.
+
+Healthcheck for dynamodb-local
+```
+healthcheck:
+  test: ["CMD-SHELL", "curl -f http://localhost:8000/shell/ || exit 1"]
+  interval: 1s
+  timeout: 10s
+  retries: 3
+```
+
+- Here the test command uses `curl` to fetch the `/shell` endpoint from the DynamoDB Local service. This endpoint returns a bash shell that can be used to interact with the database. The `CMD-SHELL` instruction allows us to run a shell command in the container, which is used to execute the `curl` command.
+
+- The `healthcheck` section can be customized to check for different endpoints or responses depending on the specifics of your DynamoDB Local setup. For example, you might check that a certain table or index exists, or that a specific query returns the expected results.
+
