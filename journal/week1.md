@@ -248,5 +248,9 @@ def healthcheck():
     return resp
 ```
 
-Just checks if the application can make a connection to the postgres database and make a simple `SELECT` query. The rsponse is successfully if app can connect to the database and fails if no connection is made.
+Just checks if the application can make a connection to the postgres database and make a simple `SELECT` query. The response is successfully if app can connect to the database and fails if no connection is made.
 
+See full implementation of healthchecks for the three services in [docker-compose.yml](../docker-compose.yml)
+
+
+## Launch an EC2 instance that has docker installed, and pull a container to demonstrate you can run your own docker processes
