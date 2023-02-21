@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask import request
 from flask_cors import CORS, cross_origin
 import os
+import psycopg2
 
 from services.home_activities import *
 from services.notification_activities import *
@@ -17,6 +18,7 @@ from services.show_activity import *
 app = Flask(__name__)
 frontend = os.getenv("FRONTEND_URL")
 backend = os.getenv("BACKEND_URL")
+database_url = os.getenv("DATABASE_URL")
 origins = [frontend, backend]
 cors = CORS(
     app,
@@ -25,6 +27,22 @@ cors = CORS(
     allow_headers="content-type,if-modified-since",
     methods="OPTIONS,GET,HEAD,POST",
 )
+conn = psycopg2.connect(database_url)
+
+
+@app.route("/api/healthcheck", methods=["GET"])
+def healthcheck():
+    # add precise checks
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT 1;")
+        cur.close()
+        resp = jsonify(health="healthy")
+        resp.status_code = 200
+    except Exception as e:
+        resp = jsonify(health="unhealthy")
+        resp.status_code = 500
+    return resp
 
 
 @app.route("/api/message_groups", methods=["GET"])

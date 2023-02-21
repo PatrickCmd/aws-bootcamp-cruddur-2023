@@ -4,6 +4,7 @@ services:
     environment:
       FRONTEND_URL: "https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
       BACKEND_URL: "https://4567-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
+      DATABASE_URL: "postgresql://postgres:password@db:5432/cruddur_db"
     build: ./backend-flask
     ports:
       - "4567:4567"
@@ -12,6 +13,11 @@ services:
     depends_on:
       - db
       - dynamodb-local
+    healthcheck:
+      test: ["CMD", "curl", "-f", "${BACKEND_URL}/api/healthcheck"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
   
   frontend-react-js:
     environment:

@@ -203,7 +203,10 @@ healthcheck:
 
 The healthcheck section specifies a test command, interval, timeout, and number of retries. The db service uses `pg_isready` to check if the Postgres server is accepting connections.
 
-Healthcheck for dynamodb-local
+### Healthcheck for dynamodb-local
+
+See resource [here](https://github.com/amazon-archives/dynamodb-janusgraph-storage-backend/blob/master/src/test/resources/docker-compose.yml)
+
 ```
 healthcheck:
   test: ["CMD-SHELL", "curl -f http://localhost:8000/shell/ || exit 1"]
@@ -215,4 +218,35 @@ healthcheck:
 - Here the test command uses `curl` to fetch the `/shell` endpoint from the DynamoDB Local service. This endpoint returns a bash shell that can be used to interact with the database. The `CMD-SHELL` instruction allows us to run a shell command in the container, which is used to execute the `curl` command.
 
 - The `healthcheck` section can be customized to check for different endpoints or responses depending on the specifics of your DynamoDB Local setup. For example, you might check that a certain table or index exists, or that a specific query returns the expected results.
+
+
+### Healthcheck for backend-flask service
+```
+healthcheck:
+  test: ["CMD", "curl", "-f", "${BACKEND_URL}/api/healthcheck"]
+  interval: 5s
+  timeout: 10s
+  retries: 3
+```
+
+The test command uses `curl` to check if the Flask application is responding to requests at the `/healthcheck` endpoint. This assumes that the Flask application has implemented the `/healthcheck` endpoint to return the response.
+
+My healthcheck endpoint in [app.py](../backend-flask/app.py)
+```python
+@app.route("/api/healthcheck", methods=["GET"])
+def healthcheck():
+    # add precise checks
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT 1;")
+        cur.close()
+        resp = jsonify(health="healthy")
+        resp.status_code = 200
+    except Exception as e:
+        resp = jsonify(health="unhealthy")
+        resp.status_code = 500
+    return resp
+```
+
+Just checks if the application can make a connection to the postgres database and make a simple `SELECT` query. The rsponse is successfully if app can connect to the database and fails if no connection is made.
 
