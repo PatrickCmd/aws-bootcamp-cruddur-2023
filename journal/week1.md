@@ -186,3 +186,19 @@ docker push ${BACKEND_IMAGE_REMOTE}
 ```
 
 ![backend flask prod](assets/week-1/backend-flask-prod.png)
+
+
+## Implement a healthcheck in the V3 Docker compose file
+
+### Health Check for postgres service
+
+I did implement the healthcheck for the postgres service.
+```
+healthcheck:
+  test: ["CMD", "pg_isready"]
+  interval: 10s
+  timeout: 5s
+  retries: 3
+```
+
+The healthcheck section specifies a test command, interval, timeout, and number of retries. The db service uses `pg_isready` to check if the Postgres server is accepting connections.
