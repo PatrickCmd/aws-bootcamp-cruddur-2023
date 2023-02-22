@@ -1,0 +1,56 @@
+###########
+# BUILDER #
+###########
+
+# pull official base image
+FROM python:3.10-slim-buster as builder
+
+# set work directory
+WORKDIR /usr/src/backend-app/
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt /usr/src/backend-app/requirements.txt
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/backend-app/wheels -r requirements.txt
+
+#########
+# FINAL #
+#########
+
+# pull official base image
+FROM python:3.10-slim-buster
+
+# create directory for the app user
+RUN mkdir -p /home/backend-app
+
+# create the app user
+RUN addgroup --system app && adduser --system --group app
+
+# create the appropriate directories
+ENV HOME=/home/backend-app
+ENV BACKEND_APP_HOME=/home/backend-app/web
+RUN mkdir $BACKEND_APP_HOME
+WORKDIR $BACKEND_APP_HOME
+
+# install dependencies
+COPY --from=builder /usr/src/backend-app/wheels /wheels
+COPY --from=builder /usr/src/backend-app/requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache /wheels/*
+
+# copy project
+COPY . $BACKEND_APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $BACKEND_APP_HOME
+
+# change to the app user
+USER app
+
+# gunicorn --bind 0.0.0.0:5000 app:app
+CMD [ "gunicorn", "--bind", "0.0.0.0:4567", "app:app"]
