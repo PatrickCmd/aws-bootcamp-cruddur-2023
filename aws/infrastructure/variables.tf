@@ -1,11 +1,6 @@
-variable "network_interface_id" {
-  type    = string
-  default = "network_id_from_aws"
-}
-
 variable "ami" {
   type    = string
-  default = "ami-005e54dee72cc1d00"
+  default = "ami-0dfcb1ef8550277af"
 }
 
 variable "instance_type" {
