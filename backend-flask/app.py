@@ -41,9 +41,10 @@ from services.show_activity import *
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
 console_handler = logging.StreamHandler()
-cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
+# cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
 LOGGER.addHandler(console_handler)
-LOGGER.addHandler(cw_handler)
+
+# LOGGER.addHandler(cw_handler)
 LOGGER.info("Test CloudWatch Logs!")
 
 
@@ -67,9 +68,12 @@ FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 
 # AWS X-RAY
+
+""" Trying to minimize spend: Comment out to enable AWS X-RAY.
 xray_url = os.getenv("AWS_XRAY_URL")
 xray_recorder.configure(service="backend-flask", dynamic_naming=xray_url)
 XRayMiddleware(app, xray_recorder)
+"""
 
 frontend = os.getenv("FRONTEND_URL")
 backend = os.getenv("BACKEND_URL")
