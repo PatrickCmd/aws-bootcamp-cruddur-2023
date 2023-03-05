@@ -72,7 +72,7 @@ app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 
-# AWS X-RAY
+# AWS X-RAY --------------------
 
 """ Trying to minimize spend: Comment out to enable AWS X-RAY.
 xray_url = os.getenv("AWS_XRAY_URL")
