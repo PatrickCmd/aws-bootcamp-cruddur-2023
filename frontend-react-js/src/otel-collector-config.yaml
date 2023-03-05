@@ -1,0 +1,23 @@
+# Honeycomb Collector configuration
+exporters:
+  otlp:
+    endpoint: api.honeycomb.io:443
+    headers:
+      # You can find your Honeycomb API key under Environment settings
+      "x-honeycomb-team": "${HONEYCOMB_API_KEY}"
+      "x-honeycomb-dataset": "cruddur-frontend-react"
+
+  processors:
+    batch:
+
+service:
+  extensions: []
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: []
+      exporters: [otlp]
