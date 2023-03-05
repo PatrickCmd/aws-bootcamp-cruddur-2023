@@ -1,0 +1,15 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/coverage
+**/.env
+**/.aws
+**/.ssh
+**/.terraform
+Dockerfile
+README.md
+docker-compose.yml
+**/.DS_Store
+**/venv
+**/env
+# **/node_modules
