@@ -1,5 +1,43 @@
 # Week 3 — Decentralized Authentication
 
+## Setting up AWS Cognito and AWS User Pool via Web Console
+
+![AWS Cognito](assets/week-3/aws_cognito_1.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_2.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_3.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_4.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_5.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_6.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_7.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_8.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_9.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_10.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_11.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_12.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_13.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_14.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_15.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_16.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_17.png)
+
+![AWS Cognito](assets/week-3/aws_cognito_18.png)
+
 Export these environment variables and also export them to the gitpod environment.
 
 ```sh
