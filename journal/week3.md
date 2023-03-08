@@ -58,6 +58,8 @@ REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID: ${AWS_APP_CLIENT_ID}
 
 Force password change AWS Cognito via aws cli
 
+- Stackoverflow reference [here](https://stackoverflow.com/questions/40287012/how-to-change-user-status-force-change-password)
+
 ```sh
 aws cognito-idp admin-set-user-password \
   --user-pool-id ${AWS_USER_POOL_ID} \
