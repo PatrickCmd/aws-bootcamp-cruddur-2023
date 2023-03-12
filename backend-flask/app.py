@@ -4,6 +4,14 @@ from flask_cors import CORS, cross_origin
 import os
 import psycopg2
 
+# Flask AWSCognito ----------------
+from utils.cognito_jwt_token import (
+    CognitoJwtToken,
+    extract_access_token,
+    TokenVerifyError,
+)
+from flask_awscognito import AWSCognitoAuthentication
+
 # Honeycomb ------------------
 from opentelemetry import trace
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
@@ -41,6 +49,13 @@ from services.messages import *
 from services.create_message import *
 from services.show_activity import *
 
+# Initialize Flask AWSCognito to get API token access from browser localstorage
+cognito_jwt_token = CognitoJwtToken(
+    user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"),
+    user_pool_client_id=os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID"),
+    region=os.getenv("AWS_DEFAULT_REGION"),
+)
+
 
 # Configuring Logger to Use CloudWatch
 LOGGER = logging.getLogger(__name__)
@@ -66,6 +81,14 @@ trace.set_tracer_provider(provider)
 tracer = trace.get_tracer(__name__)
 
 app = Flask(__name__)
+
+# Flask AWSCognitov ----------------
+"""
+app.config['AWS_DEFAULT_REGION'] = os.getenv("AWS_DEFAULT_REGION")
+app.config['AWS_COGNITO_USER_POOL_ID'] = os.getenv("AWS_COGNITO_USER_POOL_ID")
+app.config['AWS_COGNITO_USER_POOL_CLIENT_ID'] = os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID")
+aws_auth = AWSCognitoAuthentication(app)
+"""
 
 # Honeycomb ------------------
 # Initialize automatic instrumentation with Flask
@@ -198,7 +221,19 @@ def data_create_message():
 
 @app.route("/api/activities/home", methods=["GET"])
 def data_home():
-    data = HomeActivities.run(logger=LOGGER)
+    access_token = extract_access_token(request.headers)
+    try:
+        claims = cognito_jwt_token.verify(access_token)
+        # authenicatied request
+        app.logger.debug("authenicated")
+        app.logger.debug(claims)
+        app.logger.debug(claims["username"])
+        data = HomeActivities.run(logger=LOGGER, cognito_user_id=claims["username"])
+    except TokenVerifyError as e:
+        # unauthenicatied request
+        app.logger.debug(e)
+        app.logger.debug("unauthenicated")
+        data = HomeActivities.run(logger=LOGGER)
     return data, 200
 
 
