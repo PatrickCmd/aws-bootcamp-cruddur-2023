@@ -58,7 +58,7 @@ class HomeActivities:
             if cognito_user_id is not None:
                 extra_crud = {
                     "uuid": "248959df-3079-4947-b847-9e0892d1bab4",
-                    "handle": "Lore",
+                    "handle": "CMDLore",
                     "message": "My dear brother, it the humans that are the problem",
                     "created_at": (now - timedelta(hours=1)).isoformat(),
                     "expires_at": (now + timedelta(hours=12)).isoformat(),

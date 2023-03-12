@@ -1,16 +1,13 @@
+import os
 import time
 import requests
+from functools import wraps
 from jose import jwk, jwt
 from jose.exceptions import JOSEError
 from jose.utils import base64url_decode
+from flask import abort, request, make_response, jsonify, g, current_app
 
-
-class FlaskAWSCognitoError(Exception):
-    pass
-
-
-class TokenVerifyError(Exception):
-    pass
+from utils.exceptions import FlaskAWSCognitoError, TokenVerifyError
 
 
 def extract_access_token(request_headers):
@@ -115,3 +112,32 @@ class CognitoJwtToken:
 
         self.claims = claims
         return self.claims
+
+
+def token_service_factory(user_pool_id, user_pool_client_id, region):
+    return CognitoJwtToken(user_pool_id, user_pool_client_id, region)
+
+
+def authentication_required(view):
+    @wraps(view)
+    def decorated(*args, **kwargs):
+        access_token = extract_access_token(request.headers)
+        try:
+            user_pool_id = os.getenv("AWS_COGNITO_USER_POOL_ID")
+            user_pool_client_id = os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID")
+            region = os.getenv("AWS_DEFAULT_REGION")
+            token_service = token_service_factory(
+                user_pool_id, user_pool_client_id, region
+            )
+            claims = token_service.verify(access_token)
+            # claims = token_service.claims
+            current_app.logger.debug(f"claims=============: {claims}")
+
+            g.cognito_claims = claims
+        except TokenVerifyError as e:
+            _ = request.data
+            abort(make_response(jsonify(message=str(e)), 401))
+
+        return view(*args, **kwargs)
+
+    return decorated

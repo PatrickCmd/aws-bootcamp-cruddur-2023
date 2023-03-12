@@ -1,15 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, g
 from flask import request
 from flask_cors import CORS, cross_origin
 import os
 import psycopg2
 
 # Flask AWSCognito ----------------
-from utils.cognito_jwt_token import (
-    CognitoJwtToken,
-    extract_access_token,
-    TokenVerifyError,
-)
+from utils.cognito_jwt_token import authentication_required
 from flask_awscognito import AWSCognitoAuthentication
 
 # Honeycomb ------------------
@@ -50,11 +46,13 @@ from services.create_message import *
 from services.show_activity import *
 
 # Initialize Flask AWSCognito to get API token access from browser localstorage
+"""TODO: Remove this entire commented block.
 cognito_jwt_token = CognitoJwtToken(
     user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"),
     user_pool_client_id=os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID"),
     region=os.getenv("AWS_DEFAULT_REGION"),
 )
+"""
 
 
 # Configuring Logger to Use CloudWatch
@@ -176,6 +174,7 @@ def healthcheck():
 
 
 @app.route("/api/message_groups", methods=["GET"])
+@authentication_required
 def data_message_groups():
     user_handle = "andrewbrown"
     model = MessageGroups.run(user_handle=user_handle)
@@ -186,7 +185,21 @@ def data_message_groups():
 
 
 @app.route("/api/messages/@<string:handle>", methods=["GET"])
+@authentication_required
 def data_messages(handle):
+    # Todo: Remove this try exception block
+    try:
+        # claims = cognito_jwt_token.verify(access_token)
+        claims = g.cognito_claims
+        # authenicatied request
+        app.logger.debug("Message endpoint ========= authenicated")
+        app.logger.debug(f"======Message endpoint=====: {claims}")
+        app.logger.debug(claims["username"])
+    except AttributeError as e:
+        # unauthenicatied request
+        app.logger.debug(f"Error: {e}")
+        app.logger.debug("unauthenicated")
+
     user_sender_handle = "andrewbrown"
     user_receiver_handle = request.args.get("user_reciever_handle")
 
@@ -202,6 +215,7 @@ def data_messages(handle):
 
 @app.route("/api/messages", methods=["POST", "OPTIONS"])
 @cross_origin()
+@authentication_required
 def data_create_message():
     user_sender_handle = "andrewbrown"
     user_receiver_handle = request.json["user_receiver_handle"]
@@ -221,30 +235,46 @@ def data_create_message():
 
 @app.route("/api/activities/home", methods=["GET"])
 def data_home():
-    access_token = extract_access_token(request.headers)
+    # Todo: Remove this try exception block
     try:
-        claims = cognito_jwt_token.verify(access_token)
+        # claims = cognito_jwt_token.verify(access_token)
+        claims = g.cognito_claims
         # authenicatied request
         app.logger.debug("authenicated")
         app.logger.debug(claims)
         app.logger.debug(claims["username"])
         data = HomeActivities.run(logger=LOGGER, cognito_user_id=claims["username"])
-    except TokenVerifyError as e:
+    except AttributeError as e:
         # unauthenicatied request
         app.logger.debug(e)
-        app.logger.debug("unauthenicated")
+        app.logger.debug("home endpoint ======== unauthenicated")
         data = HomeActivities.run(logger=LOGGER)
     return data, 200
 
 
 @app.route("/api/activities/notifications", methods=["GET"])
+@authentication_required
 def data_notifications():
     data = NotificationActivities.run()
     return data, 200
 
 
 @app.route("/api/activities/@<string:handle>", methods=["GET"])
+@authentication_required
 def data_handle(handle):
+    # Todo: Remove this try exception block
+    try:
+        # claims = cognito_jwt_token.verify(access_token)
+        claims = g.cognito_claims
+        # authenicatied request
+        app.logger.debug("Hanlde endpoint ========= authenicated")
+        app.logger.debug(f"======Hanlde endpoint=====: {claims}")
+        app.logger.debug(claims["username"])
+    except AttributeError as e:
+        # unauthenicatied request
+        app.logger.debug(f"Error: {e}")
+        app.logger.debug("unauthenicated")
+    
     model = UserActivities.run(handle)
     if model["errors"] is not None:
         return model["errors"], 422
@@ -253,6 +283,7 @@ def data_handle(handle):
 
 
 @app.route("/api/activities/search", methods=["GET"])
+@authentication_required
 def data_search():
     term = request.args.get("term")
     model = SearchActivities.run(term)
@@ -265,6 +296,7 @@ def data_search():
 
 @app.route("/api/activities", methods=["POST", "OPTIONS"])
 @cross_origin()
+@authentication_required
 def data_activities():
     user_handle = "andrewbrown"
     message = request.json["message"]
@@ -278,6 +310,7 @@ def data_activities():
 
 
 @app.route("/api/activities/<string:activity_uuid>", methods=["GET"])
+@authentication_required
 def data_show_activity(activity_uuid):
     data = ShowActivity.run(activity_uuid=activity_uuid)
     return data, 200
@@ -285,6 +318,7 @@ def data_show_activity(activity_uuid):
 
 @app.route("/api/activities/<string:activity_uuid>/reply", methods=["POST", "OPTIONS"])
 @cross_origin()
+@authentication_required
 def data_activities_reply(activity_uuid):
     user_handle = "andrewbrown"
     message = request.json["message"]

@@ -301,3 +301,8 @@ Then test the complete sign in process to see that everything works as expected.
 ![Signin user](assets/week-3/aws_cognito_29.png)
 
 ![Signin user](assets/week-3/aws_cognito_30.png)
+
+
+### Prrotect backend endpoint routes
+
+Implemented the `token service` with the `authentication_required` decorator which I use to protect the backend routes for authenticated users. See full script [here](../backend-flask/utils/cognito_jwt_token.py)
