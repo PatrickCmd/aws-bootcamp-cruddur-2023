@@ -93,3 +93,36 @@ gp env AWS_RDS_POSTGRES_ENPOINT=${AWS_RDS_POSTGRES_ENPOINT}
 export PROD_CONNECTION_URL="postgresql://cmdcruddurroot:${AWS_RDS_POSTGRES_PASSWORD}@${AWS_RDS_POSTGRES_ENPOINT}:5432/cruddur"
 gp env PROD_CONNECTION_URL=${PROD_CONNECTION_URL}
 ```
+
+### Add binary files for creating, droping and loading database schema
+
+Reference the `bin` folder to see the full files [here](../backend-flask/bin/)
+
+### Change permissions for the binary files to be executable for the user
+
+```sh
+cd backend-flask
+chmod u+x bin/*
+cd ../
+```
+
+### Perform string replacement with the `sed` command before running the binary files.
+
+Resources to learn more about `sed` command
+1. [sed cheatsheat quickref](https://quickref.me/sed)
+2. [Digital Ocean](https://www.digitalocean.com/community/tutorials/the-basics-of-using-the-sed-stream-editor-to-manipulate-text-in-linux)
+3. [Tutorialspoint](https://www.tutorialspoint.com/sed/index.htm)
+4. [Sed - An Introduction and Tutorial by Bruce Barnett](https://www.grymoire.com/Unix/Sed.html)
+5. [Geeksforgeeks](https://www.geeksforgeeks.org/sed-command-in-linux-unix-with-examples/)
+6. [ssstonebraker/sed cheatsheet](https://gist.github.com/ssstonebraker/6140154)
+
+For example replace the `/cruddur` word with empty space using `sed` with command below:
+
+```sh
+sed 's/\/cruddur//g' <<<"$LOCAL_CONNECTION_URL"
+```
+
+Output
+```
+postgresql://postgres:password@localhost:5432
+```
