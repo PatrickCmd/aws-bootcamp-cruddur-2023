@@ -2,7 +2,7 @@ from flask import Flask, jsonify, g
 from flask import request
 from flask_cors import CORS, cross_origin
 import os
-import psycopg2
+import psycopg
 
 # Flask AWSCognito ----------------
 from utils.cognito_jwt_token import authentication_required
@@ -115,7 +115,7 @@ cors = CORS(
     expose_headers="Authorization",
     methods="OPTIONS,GET,HEAD,POST",
 )
-conn = psycopg2.connect(database_url)
+conn = psycopg.connect(database_url)
 
 
 @app.after_request
@@ -274,7 +274,7 @@ def data_handle(handle):
         # unauthenicatied request
         app.logger.debug(f"Error: {e}")
         app.logger.debug("unauthenicated")
-    
+
     model = UserActivities.run(handle)
     if model["errors"] is not None:
         return model["errors"], 422

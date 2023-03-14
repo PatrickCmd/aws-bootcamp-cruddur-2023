@@ -126,3 +126,14 @@ Output
 ```
 postgresql://postgres:password@localhost:5432
 ```
+
+### Install `psycopg` the python postgresql driver.
+Follow the link [here](https://www.psycopg.org/)
+
+
+### Set postgresql local connection URL for backend service in [docker-compose.yml](../docker-compose.yml) file
+
+```sh
+export CONTAINER_DATABASE_URL="postgresql://postgres:password@db:5432/cruddur"
+gp env CONTAINER_DATABASE_URL=${CONTAINER_DATABASE_URL}
+```

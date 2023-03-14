@@ -8,7 +8,7 @@ services:
 
       FRONTEND_URL: "https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
       BACKEND_URL: "https://4567-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
-      DATABASE_URL: "postgresql://postgres:password@db:5432/cruddur_db"
+      DATABASE_URL: "${CONTAINER_DATABASE_URL}"
       OTEL_EXPORTER_OTLP_ENDPOINT: "https://api.honeycomb.io"
       OTEL_EXPORTER_OTLP_HEADERS: "x-honeycomb-team=${HONEYCOMB_API_KEY}"
       OTEL_SERVICE_NAME: "backend-flask"
@@ -59,7 +59,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=cruddur_db
+      - POSTGRES_DB=cruddur
     ports:
       - '5432:5432'
     volumes: 
