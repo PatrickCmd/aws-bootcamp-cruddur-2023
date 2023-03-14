@@ -137,3 +137,72 @@ Follow the link [here](https://www.psycopg.org/)
 export CONTAINER_DATABASE_URL="postgresql://postgres:password@db:5432/cruddur"
 gp env CONTAINER_DATABASE_URL=${CONTAINER_DATABASE_URL}
 ```
+
+
+### Connect to RDS via Gitpod
+In order to connect to the RDS instance we need to provide our Gitpod IP and whitelist for inbound traffic on port 5432.
+
+```sh
+GITPOD_IP=$(curl ifconfig.me)
+gp env GITPOD_IP=${GITPOD_IP}
+```
+
+We'll create an inbound rule for Postgres (5432) and provide the GITPOD ID.
+
+We'll get the security group rule id so we can easily modify it in the future from the terminal here in Gitpod.
+
+```sh
+export DB_SG_ID="sg-04edcc89a5ba6f26b"
+gp env DB_SG_ID="${DB_SG_ID}"
+
+export DB_SG_RULE_ID="sgr-0b718303ba558d171"
+gp env DB_SG_RULE_ID="${DB_SG_RULE_ID}"
+```
+
+Whenever we need to update our security groups we can do this for access.
+
+```sh
+cd ${THEIA_WORKSPACE_ROOT}/backend-flask
+source bin/rds-update-sg-rule 
+cd $THEIA_WORKSPACE_ROOT
+```
+
+### Test remote access
+We'll create a connection url:
+
+```sh
+echo $PROD_CONNECTION_URL
+```
+
+We'll test that it works in Gitpod:
+
+```sh
+psql $PROD_CONNECTION_URL
+```
+
+#### Output
+```
+psql (13.10 (Ubuntu 13.10-1.pgdg20.04+1), server 14.6)
+WARNING: psql major version 13, server major version 14.
+         Some psql features might not work.
+SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+cruddur=> \l
+                                           List of databases
+   Name    |     Owner      | Encoding |   Collate   |    Ctype    |         Access privileges         
+-----------+----------------+----------+-------------+-------------+-----------------------------------
+ cruddur   | cmdcruddurroot | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ postgres  | cmdcruddurroot | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ rdsadmin  | rdsadmin       | UTF8     | en_US.UTF-8 | en_US.UTF-8 | rdsadmin=CTc/rdsadmin            +
+           |                |          |             |             | rdstopmgr=Tc/rdsadmin
+ template0 | rdsadmin       | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/rdsadmin                      +
+           |                |          |             |             | rdsadmin=CTc/rdsadmin
+ template1 | cmdcruddurroot | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/cmdcruddurroot                +
+           |                |          |             |             | cmdcruddurroot=CTc/cmdcruddurroot
+(5 rows)
+
+cruddur=> \d
+```
+
+Updated [.gitpod.yml](../.gitpod.yml) file to set `GITPOD IPAddress` and update `AWS RDS SG` whenever gitpod is lauching
