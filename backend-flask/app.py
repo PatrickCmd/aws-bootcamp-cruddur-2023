@@ -59,10 +59,10 @@ cognito_jwt_token = CognitoJwtToken(
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
 console_handler = logging.StreamHandler()
-# cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
+cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
 LOGGER.addHandler(console_handler)
 
-# LOGGER.addHandler(cw_handler)
+LOGGER.addHandler(cw_handler)
 LOGGER.info("Test CloudWatch Logs!")
 
 

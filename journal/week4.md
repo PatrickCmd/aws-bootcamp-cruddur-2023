@@ -206,3 +206,31 @@ cruddur=> \d
 ```
 
 Updated [.gitpod.yml](../.gitpod.yml) file to set `GITPOD IPAddress` and update `AWS RDS SG` whenever gitpod is lauching
+
+
+## Setup Cognito post confirmation lambda
+
+### Add permission to lambda to be able to attach VPC
+
+To create a permission, we need to attach a custom policy. See [stackoverflow resource here](https://stackoverflow.com/questions/41177965/aws-lambdathe-provided-execution-role-does-not-have-permissions-to-call-describ)
+
+For example, this is a policy that allows to deploy a Lambda into a VPC:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:CreateNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeInstances",
+        "ec2:AttachNetworkInterface"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
