@@ -32,7 +32,8 @@ class Db:
         return template_content
 
     def init_pool(self):
-        connection_url = os.getenv("CONNECTION_URL")
+        connection_url = os.getenv("DATABASE_URL")
+        print(f"connection_url: {connection_url}")
         self.pool = ConnectionPool(connection_url)
 
     # we want to commit data such as an insert
