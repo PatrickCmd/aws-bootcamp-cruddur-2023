@@ -2,7 +2,7 @@ from flask import Flask, jsonify, g
 from flask import request
 from flask_cors import CORS, cross_origin
 import os
-import psycopg2
+import psycopg
 
 # Flask AWSCognito ----------------
 from utils.cognito_jwt_token import authentication_required
@@ -59,10 +59,10 @@ cognito_jwt_token = CognitoJwtToken(
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
 console_handler = logging.StreamHandler()
-# cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
+cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
 LOGGER.addHandler(console_handler)
 
-# LOGGER.addHandler(cw_handler)
+LOGGER.addHandler(cw_handler)
 LOGGER.info("Test CloudWatch Logs!")
 
 
@@ -115,7 +115,7 @@ cors = CORS(
     expose_headers="Authorization",
     methods="OPTIONS,GET,HEAD,POST",
 )
-conn = psycopg2.connect(database_url)
+conn = psycopg.connect(database_url)
 
 
 @app.after_request
@@ -274,7 +274,7 @@ def data_handle(handle):
         # unauthenicatied request
         app.logger.debug(f"Error: {e}")
         app.logger.debug("unauthenicated")
-    
+
     model = UserActivities.run(handle)
     if model["errors"] is not None:
         return model["errors"], 422
@@ -298,7 +298,11 @@ def data_search():
 @cross_origin()
 @authentication_required
 def data_activities():
-    user_handle = "andrewbrown"
+    claims = g.cognito_claims
+    app.logger.debug(f"======Create activity endpoint=====: {claims}")
+    app.logger.debug(claims["username"])
+
+    user_handle = "patrickcmd"
     message = request.json["message"]
     ttl = request.json["ttl"]
     model = CreateActivity.run(message, user_handle, ttl)
@@ -320,9 +324,13 @@ def data_show_activity(activity_uuid):
 @cross_origin()
 @authentication_required
 def data_activities_reply(activity_uuid):
+    claims = g.cognito_claims
+    app.logger.debug(f"======Hanlde endpoint=====: {claims}")
+    app.logger.debug(claims["username"])
     user_handle = "andrewbrown"
     message = request.json["message"]
-    model = CreateReply.run(message, user_handle, activity_uuid)
+    ttl = request.json["ttl"]
+    model = CreateReply.run(message, user_handle, ttl)
     if model["errors"] is not None:
         return model["errors"], 422
     else:
