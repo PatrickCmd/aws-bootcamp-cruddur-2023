@@ -1,5 +1,25 @@
 # Week 4 — Postgres and RDS
 
+## Reference
+
+I used the [instructors journal](https://github.com/omenking/aws-bootcamp-cruddur-2023/blob/week-4/journal/week4.md) as a reference.
+
+## Note:
+The last final implementations for this week were done with both gitpod and codespaces. Run low on gitpod credits, so most of the environment variables are pointing to `CODESPACES` environment.
+
+### Setting up codespaces environment
+```sh
+export CODESPACES_IP=$(curl ifconfig.me)
+cd backend-flask
+./bin/rds-update-sg-rule CODDESPACES
+```
+
+### Test for database connection
+```sh
+./bin/db-connect prod
+cd ../
+```
+
 ## Provision RDS Instance via AWS CONSOLE
 
 I started by experimenting how to provision an AWS RDS instance from the `AWS web console (GUI)` and also update the vpc security group of the instance to allow connections to the database instance from anywhere.
@@ -521,3 +541,69 @@ created_at      | 2023-03-18 15:11:03.157329
 
 cruddur=> 
 ````
+
+
+## Creaing activities
+
+Implemented creating activities endpoint and wiring it with the frontend. See full implementation here [create_activity.py](../backend-flask/services/create_activity.py)
+
+![create activities](assets/week-4/crud_1.png)
+
+![create activities](assets/week-4/frontend_list_activities.png)
+
+### Checking for created activities in production database (AWS RDS Instance)
+
+```sh
+cd backend-flask
+./bin/db-connect prod
+```
+
+
+```
+@PatrickCmd ➜ /workspaces/aws-bootcamp-cruddur-2023/backend-flask (week-4) $ ./bin/db-connect prod
+Running in production mode
+psql (13.10 (Ubuntu 13.10-1.pgdg20.04+1), server 14.6)
+WARNING: psql major version 13, server major version 14.
+         Some psql features might not work.
+SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+cruddur=> SELECT * FROM activities;
+cruddur=> \x on
+Expanded display is on.
+cruddur=> SELECT * FROM activities;
+-[ RECORD 1 ]----------+----------------------------------------------------------------------------------------------------------------------------------------
+uuid                   | 9dc949ea-179f-4c93-a05e-67188e64b06c
+user_uuid              | 0b24a278-b60e-4d43-98ab-d10316c8469c
+message                | Learning AWS cloud with Andrew Brown. Completing week 4.
+replies_count          | 0
+reposts_count          | 0
+likes_count            | 0
+reply_to_activity_uuid | 
+expires_at             | 2023-03-27 09:18:27.676211
+created_at             | 2023-03-20 09:18:27.716455
+-[ RECORD 2 ]----------+----------------------------------------------------------------------------------------------------------------------------------------
+uuid                   | 7057f717-7c0c-4040-abb1-a4c441004a7d
+user_uuid              | 0b24a278-b60e-4d43-98ab-d10316c8469c
+message                | First to mind when asked what 'the cloud' is, a majority respond it’s either an actual cloud, the sky, or something related to weather.
+replies_count          | 0
+reposts_count          | 0
+likes_count            | 0
+reply_to_activity_uuid | 
+expires_at             | 2023-03-27 09:26:18.707299
+created_at             | 2023-03-20 09:26:18.748366
+-[ RECORD 3 ]----------+----------------------------------------------------------------------------------------------------------------------------------------
+uuid                   | a02aa21a-3617-495d-a0dd-ee53b3e8d92c
+user_uuid              | 0b24a278-b60e-4d43-98ab-d10316c8469c
+message                | Week 4 has been tough though. A lot of moving parts.
+replies_count          | 0
+reposts_count          | 0
+likes_count            | 0
+reply_to_activity_uuid | 
+expires_at             | 2023-03-27 09:27:21.969397
+created_at             | 2023-03-20 09:27:22.010373
+
+cruddur=> 
+```
+
+![create activities](assets/week-4/database_activities.png)

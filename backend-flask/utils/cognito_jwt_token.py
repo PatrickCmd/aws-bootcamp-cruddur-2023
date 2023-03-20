@@ -118,6 +118,22 @@ def token_service_factory(user_pool_id, user_pool_client_id, region):
     return CognitoJwtToken(user_pool_id, user_pool_client_id, region)
 
 
+# TODO: Get user info for cognito user from the access token
+"""
+def get_user_info(self, access_token, requests_client=None):
+    user_url = f"{self.domain}/oauth2/userInfo"
+    header = {"Authorization": f"Bearer {access_token}"}
+    try:
+        if not requests_client:
+            requests_client = requests.post
+        response = requests_client(user_url, headers=header)
+        response_json = response.json()
+    except requests.exceptions.RequestException as e:
+        raise FlaskAWSCognitoError(str(e)) from e
+    return response_json
+"""
+
+
 def authentication_required(view):
     @wraps(view)
     def decorated(*args, **kwargs):
