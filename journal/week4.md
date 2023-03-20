@@ -543,7 +543,7 @@ cruddur=>
 ````
 
 
-## Creaing activities
+## Creating activities Endpoint
 
 Implemented creating activities endpoint and wiring it with the frontend. See full implementation here [create_activity.py](../backend-flask/services/create_activity.py)
 
