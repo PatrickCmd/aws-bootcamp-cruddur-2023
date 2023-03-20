@@ -298,7 +298,11 @@ def data_search():
 @cross_origin()
 @authentication_required
 def data_activities():
-    user_handle = "andrewbrown"
+    claims = g.cognito_claims
+    app.logger.debug(f"======Create activity endpoint=====: {claims}")
+    app.logger.debug(claims["username"])
+
+    user_handle = "patrickcmd"
     message = request.json["message"]
     ttl = request.json["ttl"]
     model = CreateActivity.run(message, user_handle, ttl)
@@ -320,9 +324,13 @@ def data_show_activity(activity_uuid):
 @cross_origin()
 @authentication_required
 def data_activities_reply(activity_uuid):
+    claims = g.cognito_claims
+    app.logger.debug(f"======Hanlde endpoint=====: {claims}")
+    app.logger.debug(claims["username"])
     user_handle = "andrewbrown"
     message = request.json["message"]
-    model = CreateReply.run(message, user_handle, activity_uuid)
+    ttl = request.json["ttl"]
+    model = CreateReply.run(message, user_handle, ttl)
     if model["errors"] is not None:
         return model["errors"], 422
     else:
