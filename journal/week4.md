@@ -224,6 +224,11 @@ Output
 postgresql://postgres:password@localhost:5432
 ```
 
+### Print Color in terminal
+- [Print color in python terminal](https://www.geeksforgeeks.org/print-colors-python-terminal/)
+- [Stackoverflow - Bash terminal colors](https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal)
+- [How to print colored text in python](https://www.studytonight.com/python-howtos/how-to-print-colored-text-in-python)
+
 ### Install `psycopg` the python postgresql driver.
 Follow the link [here](https://www.psycopg.org/)
 
