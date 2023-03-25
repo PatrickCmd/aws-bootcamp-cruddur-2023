@@ -23,6 +23,11 @@ tasks:
       cd ${THEIA_WORKSPACE_ROOT}/frontend-react-js
       npm i
       cd $THEIA_WORKSPACE_ROOT
+  - name: flask
+    command: |
+      cd ${THEIA_WORKSPACE_ROOT}/backend-flask
+      pip install -r requirements.txt
+      cd $THEIA_WORKSPACE_ROOT
   - name: terraform
     init: |
       sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl

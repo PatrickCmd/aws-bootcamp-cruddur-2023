@@ -176,7 +176,8 @@ def healthcheck():
 @app.route("/api/message_groups", methods=["GET"])
 @authentication_required
 def data_message_groups():
-    user_handle = "andrewbrown"
+    current_user = g.current_user
+    user_handle = current_user
     model = MessageGroups.run(user_handle=user_handle)
     if model["errors"] is not None:
         return model["errors"], 422
