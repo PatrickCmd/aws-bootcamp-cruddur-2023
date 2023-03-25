@@ -176,9 +176,11 @@ def healthcheck():
 @app.route("/api/message_groups", methods=["GET"])
 @authentication_required
 def data_message_groups():
+    claims = g.cognito_claims
+    cognito_user_id = claims["sub"]
     current_user = g.current_user
-    user_handle = current_user
-    model = MessageGroups.run(user_handle=user_handle)
+
+    model = MessageGroups.run(cognito_user_id=cognito_user_id)
     if model["errors"] is not None:
         return model["errors"], 422
     else:
@@ -188,20 +190,10 @@ def data_message_groups():
 @app.route("/api/messages/@<string:handle>", methods=["GET"])
 @authentication_required
 def data_messages(handle):
-    # Todo: Remove this try exception block
-    try:
-        # claims = cognito_jwt_token.verify(access_token)
-        claims = g.cognito_claims
-        # authenicatied request
-        app.logger.debug("Message endpoint ========= authenicated")
-        app.logger.debug(f"======Message endpoint=====: {claims}")
-        app.logger.debug(claims["username"])
-    except AttributeError as e:
-        # unauthenicatied request
-        app.logger.debug(f"Error: {e}")
-        app.logger.debug("unauthenicated")
-
+    claims = g.cognito_claims
     user_sender_handle = "andrewbrown"
+
+    app.logger.debug(f"Request args: {request.args}")
     user_receiver_handle = request.args.get("user_reciever_handle")
 
     model = Messages.run(
