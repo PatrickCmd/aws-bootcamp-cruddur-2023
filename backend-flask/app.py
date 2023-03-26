@@ -45,15 +45,6 @@ from services.messages import *
 from services.create_message import *
 from services.show_activity import *
 
-# Initialize Flask AWSCognito to get API token access from browser localstorage
-"""TODO: Remove this entire commented block.
-cognito_jwt_token = CognitoJwtToken(
-    user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"),
-    user_pool_client_id=os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID"),
-    region=os.getenv("AWS_DEFAULT_REGION"),
-)
-"""
-
 
 # Configuring Logger to Use CloudWatch
 LOGGER = logging.getLogger(__name__)
@@ -187,17 +178,13 @@ def data_message_groups():
         return model["data"], 200
 
 
-@app.route("/api/messages/@<string:handle>", methods=["GET"])
+@app.route("/api/messages/<string:message_group_uuid>", methods=["GET"])
 @authentication_required
-def data_messages(handle):
+def data_messages(message_group_uuid):
     claims = g.cognito_claims
-    user_sender_handle = "andrewbrown"
-
-    app.logger.debug(f"Request args: {request.args}")
-    user_receiver_handle = request.args.get("user_reciever_handle")
-
+    cognito_user_id = claims["sub"]
     model = Messages.run(
-        user_sender_handle=user_sender_handle, user_receiver_handle=user_receiver_handle
+        cognito_user_id=cognito_user_id, message_group_uuid=message_group_uuid
     )
     if model["errors"] is not None:
         return model["errors"], 422
@@ -210,20 +197,37 @@ def data_messages(handle):
 @cross_origin()
 @authentication_required
 def data_create_message():
-    user_sender_handle = "andrewbrown"
-    user_receiver_handle = request.json["user_receiver_handle"]
+    message_group_uuid = request.json.get("message_group_uuid", None)
+    user_receiver_handle = request.json.get("handle", None)
     message = request.json["message"]
 
-    model = CreateMessage.run(
-        message=message,
-        user_sender_handle=user_sender_handle,
-        user_receiver_handle=user_receiver_handle,
-    )
+    claims = g.cognito_claims
+    current_user = g.current_user
+    cognito_user_id = claims["sub"]
+
+    if message_group_uuid == None:
+        # Create for the first time
+        model = CreateMessage.run(
+            mode="create",
+            message=message,
+            cognito_user_id=cognito_user_id,
+            current_user=current_user,
+            user_receiver_handle=user_receiver_handle,
+        )
+    else:
+        # Push onto existing Message Group
+        model = CreateMessage.run(
+            mode="update",
+            message=message,
+            message_group_uuid=message_group_uuid,
+            cognito_user_id=cognito_user_id,
+            current_user=current_user,
+        )
+
     if model["errors"] is not None:
         return model["errors"], 422
     else:
         return model["data"], 200
-    return
 
 
 @app.route("/api/activities/home", methods=["GET"])
@@ -255,19 +259,6 @@ def data_notifications():
 @app.route("/api/activities/@<string:handle>", methods=["GET"])
 @authentication_required
 def data_handle(handle):
-    # Todo: Remove this try exception block
-    try:
-        # claims = cognito_jwt_token.verify(access_token)
-        claims = g.cognito_claims
-        # authenicatied request
-        app.logger.debug("Hanlde endpoint ========= authenicated")
-        app.logger.debug(f"======Hanlde endpoint=====: {claims}")
-        app.logger.debug(claims["username"])
-    except AttributeError as e:
-        # unauthenicatied request
-        app.logger.debug(f"Error: {e}")
-        app.logger.debug("unauthenicated")
-
     model = UserActivities.run(handle)
     if model["errors"] is not None:
         return model["errors"], 422
@@ -291,11 +282,9 @@ def data_search():
 @cross_origin()
 @authentication_required
 def data_activities():
-    claims = g.cognito_claims
-    app.logger.debug(f"======Create activity endpoint=====: {claims}")
-    app.logger.debug(claims["username"])
+    current_user = g.current_user
 
-    user_handle = "patrickcmd"
+    user_handle = current_user.get("preferred_username")
     message = request.json["message"]
     ttl = request.json["ttl"]
     model = CreateActivity.run(message, user_handle, ttl)
@@ -317,10 +306,8 @@ def data_show_activity(activity_uuid):
 @cross_origin()
 @authentication_required
 def data_activities_reply(activity_uuid):
-    claims = g.cognito_claims
-    app.logger.debug(f"======Hanlde endpoint=====: {claims}")
-    app.logger.debug(claims["username"])
-    user_handle = "andrewbrown"
+    current_user = g.current_user
+    user_handle = current_user.get("preferred_username")
     message = request.json["message"]
     ttl = request.json["ttl"]
     model = CreateReply.run(message, user_handle, ttl)
