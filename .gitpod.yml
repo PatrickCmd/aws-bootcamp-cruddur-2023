@@ -18,6 +18,7 @@ tasks:
       export GITPOD_IP=$(curl ifconfig.me)
       gp env GITPOD_IP="${GITPOD_IP}"
       source  "$THEIA_WORKSPACE_ROOT/backend-flask/bin/rds/update-sg-rule" GITPOD
+      source "$THEIA_WORKSPACE_ROOT/backend-flask/bin/rds/start-rds-instance"
   - name: frontend-node-modules
     init: |
       cd ${THEIA_WORKSPACE_ROOT}/frontend-react-js
