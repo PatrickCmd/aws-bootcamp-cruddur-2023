@@ -4,7 +4,8 @@ VALUES
   ('Patrick Walukagga', 'patrickcmd', 'pwalukagga@gmail.com', 'MOCK'),
   ('Telnet Cmd', 'telnetcmd', 'patrickcmdtelnet@gmail.com', 'MOCK'),
   ('Andrew Brown', 'andrewbrown', 'andrewbrown@cloudprojectbootcamp.com', 'MOCK'),
-  ('Andrew Bayko', 'bayko', 'bayko@cloudprojectbootcamp.com', 'MOCK');
+  ('Andrew Bayko', 'bayko', 'bayko@cloudprojectbootcamp.com', 'MOCK'),
+  ('Londo Mollari','lmollari@centari.com' ,'londo' ,'MOCK');
 
 INSERT INTO public.activities (user_uuid, message, expires_at)
 VALUES
