@@ -29,10 +29,11 @@ class Ddb:
                 ":pk": {"S": f"GRP#{my_user_uuid}"},
             },
         }
-        print("query-params")
+
+        # print("query-params")
         print(query_params)
-        print("client")
-        print(client)
+        # print("client")
+        # print(client)
 
         # query the table
         response = client.query(**query_params)
@@ -82,8 +83,8 @@ class Ddb:
                     "created_at": created_at,
                 }
             )
-        print("EEE")
-        print(results)
+        
+        # print(results)
         return results
 
     def create_message(

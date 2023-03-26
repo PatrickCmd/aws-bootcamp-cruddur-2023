@@ -295,6 +295,32 @@ my-uuid: 618e67a7-336f-4578-97b8-4740f7c93aa3
 }
 ```
 
+## Implement Conversations with DynamoDB into the application
+
+![home page](assets/week-5/home.png)
+
+![signin](assets/week-5/signin.png)
+
+![home after signin](assets/week-5/home_after_signin.png)
+
+![crud create activity](assets/week-5/crud_create_acivity.png)
+
+![home after crud create activity](assets/week-5/home_after_crud_create_activity.png)
+
+![display message groups](assets/week-5/display_message_groups.png)
+
+![messages in message groups](assets/week-5/display_messages_of_group.png)
+
+![create message in group](assets/week-5/create_message.png)
+
+![created message in group](assets/week-5/created_message_in_group.png)
+
+![new handle](assets/week-5/message_new_handle.png)
+
+![new handle create message](assets/week-5/new_handle_create_message.png)
+
+![new handle created message](assets/week-5/new_handle_created_message.png)
+
 ## Additional Resources
 
 ### AWS DynamoBD

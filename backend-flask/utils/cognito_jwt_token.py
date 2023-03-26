@@ -165,9 +165,6 @@ def authentication_required(view):
                 user_pool_id, user_pool_client_id, region
             )
             claims = token_service.verify(access_token)
-            # claims = token_service.claims
-            current_app.logger.debug(f"claims=============: {claims}")
-
             g.cognito_claims = claims
 
             # current user

@@ -238,14 +238,10 @@ def data_home():
         # claims = cognito_jwt_token.verify(access_token)
         claims = g.cognito_claims
         # authenicatied request
-        app.logger.debug("authenicated")
-        app.logger.debug(claims)
-        app.logger.debug(claims["username"])
         data = HomeActivities.run(logger=LOGGER, cognito_user_id=claims["username"])
     except AttributeError as e:
         # unauthenicatied request
         app.logger.debug(e)
-        app.logger.debug("home endpoint ======== unauthenicated")
         data = HomeActivities.run(logger=LOGGER)
     return data, 200
 
