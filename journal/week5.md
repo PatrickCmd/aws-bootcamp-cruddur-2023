@@ -426,13 +426,50 @@ def lambda_handler(event, context):
 
 #### Grant the lambda IAM role permission to read the DynamoDB stream events
 
+- Also remember to attach `AmazonDynamoDBFullAccess` policy in case of any errors.
+
 ![Attach policy](assets/week-5/create_lambda_attach_policy.png)
 
 ![Attach policy](assets/week-5/create_lambda_attach_policy2.png)
 
+![Attach policy](assets/week-5/create_lambda_attach_policy3.png)
+
+- Found that adding `DynamoDB Full Access` policy doesn't resolve the permission errors. So went ahead and created/attached an inline plocy with the permissions below
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:476313879638:table/cruddur-messages",
+                "arn:aws:dynamodb:us-east-1:476313879638:table/cruddur-messages/index/message-group-sk-index"
+            ]
+        }
+    ]
+}
+```
+
+![Attach policy](assets/week-5/create_lambda_attach_policy4.png)
+
+
+
 #### Add the function as a trigger on the stream
 
 ![Add lambda trigger](assets/week-5/create_lambda_turnon_trigger.png)
+
+### Testing out DynamoDB Streams with Lambda
+
+![dynamodb streams](assets/week-5/dynamoDB_streams_testing.png)
+
+![dynamodb streams](assets/week-5/dynamoDB_streams_testing_lambda_logs.png)
 
 
 ## Additional Resources
@@ -463,3 +500,9 @@ def lambda_handler(event, context):
 
 ### AWS Security
 - [AWS Security BootCamp 2023 Youtibe Playlist](https://www.youtube.com/playlist?list=PLrU93JvkXVl5TamdCdCwzqFs6vt5vySFi)
+
+
+### Josh Hargett's Medium Blogs
+- [Josh Hargett](https://medium.com/@joshhargett.jh)
+
+I have not been writing blogs, though I have found Josh Hargett's medium blogs as a good motivator to start thinking also putting out my work out their as simple contribution to the tech community.
