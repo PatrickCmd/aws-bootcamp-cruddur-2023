@@ -1,6 +1,8 @@
 import os
 import time
 import requests
+import boto3
+import json
 from functools import wraps
 from jose import jwk, jwt
 from jose.exceptions import JOSEError
@@ -113,25 +115,42 @@ class CognitoJwtToken:
         self.claims = claims
         return self.claims
 
+    # Get user info for cognito user from the access token
+    def get_user_info(self, access_token):
+        # mapping attribute names to keys in dict_user
+        attr_mappings = {
+            "sub": "sub",
+            "name": "name",
+            "preferred_username": "preferred_username",
+            "email": "email",
+            "email_verified": "email_verified",
+        }
+
+        def set_attr_value(attr):
+            # Use a dictionary to map attribute name to function that sets value in dict_user
+            dict_user[attr_mappings[attr["Name"]]] = attr["Value"]
+
+        try:
+            client = boto3.client("cognito-idp")
+            response = client.get_user(AccessToken=access_token)
+
+            dict_user = {}
+            attrs = response["UserAttributes"]
+            for attr in attrs:
+                if attr["Name"] in attr_mappings:
+                    set_attr_value(attr)
+
+            current_app.logger.debug(
+                json.dumps(dict_user, sort_keys=True, indent=2, default=str)
+            )
+            return dict_user
+        except Exception as e:
+            current_app.logger.debug(f"Error: {e}")
+            return {}
+
 
 def token_service_factory(user_pool_id, user_pool_client_id, region):
     return CognitoJwtToken(user_pool_id, user_pool_client_id, region)
-
-
-# TODO: Get user info for cognito user from the access token
-"""
-def get_user_info(self, access_token, requests_client=None):
-    user_url = f"{self.domain}/oauth2/userInfo"
-    header = {"Authorization": f"Bearer {access_token}"}
-    try:
-        if not requests_client:
-            requests_client = requests.post
-        response = requests_client(user_url, headers=header)
-        response_json = response.json()
-    except requests.exceptions.RequestException as e:
-        raise FlaskAWSCognitoError(str(e)) from e
-    return response_json
-"""
 
 
 def authentication_required(view):
@@ -146,10 +165,12 @@ def authentication_required(view):
                 user_pool_id, user_pool_client_id, region
             )
             claims = token_service.verify(access_token)
-            # claims = token_service.claims
-            current_app.logger.debug(f"claims=============: {claims}")
-
             g.cognito_claims = claims
+
+            # current user
+            current_user = token_service.get_user_info(access_token)
+            if current_user:
+                g.current_user = current_user
         except TokenVerifyError as e:
             _ = request.data
             abort(make_response(jsonify(message=str(e)), 401))

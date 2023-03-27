@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import boto3
+import os
+import json
+
+# Move access token to a separate variable or configuration file
+access_token = os.environ.get("ACCESS_TOKEN")
+
+# mapping attribute names to keys in dict_user
+attr_mappings = {
+    "sub": "sub",
+    "name": "name",
+    "preferred_username": "preferred_username",
+    "email": "email",
+    "email_verified": "email_verified",
+}
+
+def set_attr_value(attr):
+    # Use a dictionary to map attribute name to function that sets value in dict_user
+    dict_user[attr_mappings[attr["Name"]]] = attr["Value"]
+
+try:
+    client = boto3.client('cognito-idp')
+    response = client.get_user(AccessToken=access_token)
+
+    dict_user = {}
+    attrs = response['UserAttributes']
+    for attr in attrs:
+        if attr["Name"] in attr_mappings:
+            set_attr_value(attr)
+
+    print(json.dumps(dict_user, sort_keys=True, indent=2, default=str))
+except Exception as e:
+    print(f"Error: {e}")

@@ -16,6 +16,7 @@ watchtower
 blinker
 rollbar
 Flask-AWSCognito
+boto3
 
 # Dev
 black==23.1.0

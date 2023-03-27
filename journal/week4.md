@@ -11,12 +11,12 @@ The last final implementations for this week were done with both gitpod and code
 ```sh
 export CODESPACES_IP=$(curl ifconfig.me)
 cd backend-flask
-./bin/rds-update-sg-rule CODDESPACES
+./bin/rds/update-sg-rule CODDESPACES
 ```
 
 ### Test for database connection
 ```sh
-./bin/db-connect prod
+./bin/db/connect prod
 cd ../
 ```
 
@@ -224,6 +224,11 @@ Output
 postgresql://postgres:password@localhost:5432
 ```
 
+### Print Color in terminal
+- [Print color in python terminal](https://www.geeksforgeeks.org/print-colors-python-terminal/)
+- [Stackoverflow - Bash terminal colors](https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal)
+- [How to print colored text in python](https://www.studytonight.com/python-howtos/how-to-print-colored-text-in-python)
+
 ### Install `psycopg` the python postgresql driver.
 Follow the link [here](https://www.psycopg.org/)
 
@@ -260,7 +265,7 @@ Whenever we need to update our security groups we can do this for access.
 
 ```sh
 cd ${THEIA_WORKSPACE_ROOT}/backend-flask
-source bin/rds-update-sg-rule 
+source bin/rds/update-sg-rule GITPOD
 cd $THEIA_WORKSPACE_ROOT
 ```
 
@@ -314,7 +319,7 @@ Updated [.gitpod.yml](../.gitpod.yml) file to set `GITPOD IPAddress` and update 
 
 ```sh
 cd ${THEIA_WORKSPACE_ROOT}/backend-flask
-./bin/db-schema-load prod
+./bin/db/schema-load prod
 ```
 
 **Output**
@@ -332,7 +337,7 @@ CREATE TABLE
 ```
 
 ```sh
-./bin/db-connect prod
+./bin/db/connect prod
 ```
 
 **Output**
@@ -555,7 +560,7 @@ Implemented creating activities endpoint and wiring it with the frontend. See fu
 
 ```sh
 cd backend-flask
-./bin/db-connect prod
+./bin/db/connect prod
 ```
 
 
