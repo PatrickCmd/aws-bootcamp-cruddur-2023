@@ -83,7 +83,7 @@ class Ddb:
                     "created_at": created_at,
                 }
             )
-        
+
         # print(results)
         return results
 

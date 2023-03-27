@@ -321,6 +321,120 @@ my-uuid: 618e67a7-336f-4578-97b8-4740f7c93aa3
 
 ![new handle created message](assets/week-5/new_handle_created_message.png)
 
+## DynamoDB Streams and Serverless Caching
+
+### DynamoDB Stream trigger to update message groups
+- create a VPC endpoint for dynamoDB service on your VPC
+- create a Python lambda function in your vpc
+- enable streams on the table with 'new image' attributes included
+- add your function as a trigger on the stream
+- grant the lambda IAM role permission to read the DynamoDB stream events
+
+`AWSLambdaInvocation-DynamoDB`
+
+- grant the lambda IAM role permission to update table items
+
+#### Create DynamoDB table and load schema in production
+
+See full scripts [here](../backend-flask/bin/ddb/)
+
+```sh
+cd ${THEIA_WORKSPACE_ROOT}/backend-flask
+./bin/ddb/schema-load prod
+```
+
+![dynamodb prod table](assets/week-5/dynamodb_table_prod.png)
+
+#### The function
+
+```python
+import json
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+
+dynamodb = boto3.resource(
+ 'dynamodb',
+ region_name='us-east-1',
+ endpoint_url="http://dynamodb.us-east-1.amazonaws.com"
+)
+
+def lambda_handler(event, context):
+  pk = event['Records'][0]['dynamodb']['Keys']['pk']['S']
+  sk = event['Records'][0]['dynamodb']['Keys']['sk']['S']
+  if pk.startswith('MSG#'):
+    group_uuid = pk.replace("MSG#","")
+    message = event['Records'][0]['dynamodb']['NewImage']['message']['S']
+    print("GRUP ===>",group_uuid,message)
+    
+    table_name = 'cruddur-messages'
+    index_name = 'message-group-sk-index'
+    table = dynamodb.Table(table_name)
+    data = table.query(
+      IndexName=index_name,
+      KeyConditionExpression=Key('message_group_uuid').eq(group_uuid)
+    )
+    print("RESP ===>",data['Items'])
+    
+    # recreate the message group rows with new SK value
+    for i in data['Items']:
+      delete_item = table.delete_item(Key={'pk': i['pk'], 'sk': i['sk']})
+      print("DELETE ===>",delete_item)
+      
+      response = table.put_item(
+        Item={
+          'pk': i['pk'],
+          'sk': sk,
+          'message_group_uuid':i['message_group_uuid'],
+          'message':message,
+          'user_display_name': i['user_display_name'],
+          'user_handle': i['user_handle'],
+          'user_uuid': i['user_uuid']
+        }
+      )
+      print("CREATE ===>",response)
+```
+
+#### Turn on DynamoDB streams
+
+- Enable streams on the table with 'new image' attributes included
+
+![dynamodb-streams](assets/week-5/turn_dynamodb_streams_on_new_image.png)
+
+![dynamodb-streams](assets/week-5/dynamodb_streams_details.png)
+
+#### VPC endpoint for dynamoDB service on the VPC
+
+![create dynamo vpc endpoint](assets/week-5/create_dynamo_vpc_endpoint1.png)
+
+![create dynamo vpc endpoint](assets/week-5/create_dynamo_vpc_endpoint2.png)
+
+![create dynamo vpc endpoint](assets/week-5/create_dynamo_vpc_endpoint3.png)
+
+![create dynamo vpc endpoint](assets/week-5/create_dynamo_vpc_endpoint4.png)
+
+#### Create a Python lambda function in the vpc
+
+![Create a Python lambda](assets/week-5/create_lambda_function1.png)
+
+![Create a Python lambda](assets/week-5/create_lambda_function2.png)
+
+![Create a Python lambda](assets/week-5/create_lambda_function3.png)
+
+![Create a Python lambda](assets/week-5/create_lambda_function4.png)
+
+![Create a Python lambda](assets/week-5/create_lambda_function5.png)
+
+#### Grant the lambda IAM role permission to read the DynamoDB stream events
+
+![Attach policy](assets/week-5/create_lambda_attach_policy.png)
+
+![Attach policy](assets/week-5/create_lambda_attach_policy2.png)
+
+#### Add the function as a trigger on the stream
+
+![Add lambda trigger](assets/week-5/create_lambda_turnon_trigger.png)
+
+
 ## Additional Resources
 
 ### AWS DynamoBD
