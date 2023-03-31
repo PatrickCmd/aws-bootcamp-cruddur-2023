@@ -36,3 +36,35 @@
 - Limit ability to ssh into EC2 container to read only file systems - use APIs or GitOps to pull information for troubleshooting
 - Amazon CloudWatch to monitor Malicious ECS Configuration Changes
 - Only using Authorized Container Images (hopefully some Image signing in the future e.g sigstore)
+
+## Test RDS Connecetion
+Add this `test` script into `db` so we can easily check our connection from our container.
+
+```python
+#!/usr/bin/env python3
+
+import psycopg
+import os
+import sys
+
+connection_url = os.getenv("CONNECTION_URL")
+
+conn = None
+try:
+  print('attempting connection')
+  conn = psycopg.connect(connection_url)
+  print("Connection successful!")
+except psycopg.Error as e:
+  print("Unable to connect to the database:", e)
+finally:
+  conn.close()
+```
+
+Make file executable and test with production RDS instance
+
+```sh
+cd ${THEIA_WORKSPACE_ROOT}/backend-flask
+chmod u+x bin/db/test
+./bin/db/test
+cd $THEIA_WORKSPACE_ROOT
+```
