@@ -68,3 +68,44 @@ chmod u+x bin/db/test
 ./bin/db/test
 cd $THEIA_WORKSPACE_ROOT
 ```
+
+## Task Flask Script
+Add the health-check endpoint for the flask app. See [app.py](../backend-flask/app.py)
+
+```python
+@app.route('/api/health-check')
+def health_check():
+  return {'success': True}, 200
+```
+
+Create a new bin script at `backend/bin/flask/health-check` for performing health checks against the backend flask app.
+
+```python
+#!/usr/bin/env python3
+
+import urllib.request
+
+response = urllib.request.urlopen('http://localhost:4567/api/health-check')
+if response.getcode() == 200:
+  print("[OK] Flask server is running")
+  exit(0) # success
+else:
+  print("[BAD] Flask server is not running")
+  exit(1) # false
+```
+
+Make file executable and test with production RDS instance
+
+```sh
+cd ${THEIA_WORKSPACE_ROOT}/backend-flask
+chmod u+x bin/flask/health-check
+./bin/flask/health-check
+cd $THEIA_WORKSPACE_ROOT
+```
+
+**Output**
+```
+gitpod /workspace/aws-bootcamp-cruddur-2023 (week-6) $ ./backend-flask/bin/flask/health-check 
+[OK] Flask server is running
+gitpod /workspace/aws-bootcamp-cruddur-2023 (week-6)
+```
