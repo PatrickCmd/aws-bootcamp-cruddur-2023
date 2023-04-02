@@ -1,4 +1,4 @@
-# Week 6 — Deploying Containers
+# Week 6 — Deploying Containers (Serverless Containers)
 
 ## AWS Containers
 
@@ -412,4 +412,157 @@ aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWri
 ```sh
 aws ecs register-task-definition --cli-input-json file://aws/task-definitions/backend-flask.json
 aws ecs register-task-definition --cli-input-json file://aws/task-definitions/frontend-react-js.json
+```
+
+### Create Default VPC
+
+#### Defaults
+
+```sh
+export DEFAULT_VPC_ID=$(aws ec2 describe-vpcs \
+--filters "Name=isDefault, Values=true" \
+--query "Vpcs[0].VpcId" \
+--output text)
+echo $DEFAULT_VPC_ID
+gp env DEFAULT_VPC_ID=$DEFAULT_VPC_ID
+```
+
+Get subnets under the cruddur default VPC
+
+```sh
+export DEFAULT_SUBNET_IDS=$(aws ec2 describe-subnets  \
+ --filters Name=vpc-id,Values=$DEFAULT_VPC_ID \
+ --query 'Subnets[*].SubnetId' \
+ --output json | jq -r 'join(",")')
+echo $DEFAULT_SUBNET_IDS
+gp env DEFAULT_SUBNET_IDS=$DEFAULT_SUBNET_IDS
+```
+
+### Create Security Group
+
+```sh
+export CRUD_SERVICE_SG=$(aws ec2 create-security-group \
+  --group-name "crud-srv-sg" \
+  --description "Security group for Cruddur services on ECS" \
+  --vpc-id $DEFAULT_VPC_ID \
+  --query "GroupId" --output text)
+echo $CRUD_SERVICE_SG
+gp env CRUD_SERVICE_SG=$CRUD_SERVICE_SG
+```
+
+Authorize port `80`
+
+```sh
+aws ec2 authorize-security-group-ingress \
+  --group-id $CRUD_SERVICE_SG \
+  --protocol tcp \
+  --port 80 \
+  --cidr 0.0.0.0/0
+```
+
+**Sample Output**
+```
+{
+    "Return": true,
+    "SecurityGroupRules": [
+        {
+            "SecurityGroupRuleId": "sgr-0287ad770ddc57ec1",
+            "GroupId": "sg-0137ccf1e64b452a2",
+            "GroupOwnerId": "476313879638",
+            "IsEgress": false,
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIpv4": "0.0.0.0/0"
+        }
+    ]
+}
+```
+
+> If we need to get the sg group id again
+
+```sh
+export CRUD_SERVICE_SG=$(aws ec2 describe-security-groups \
+  --filters Name=group-name,Values=crud-srv-sg \
+  --query 'SecurityGroups[*].GroupId' \
+  --output text)
+```
+
+### Update RDS SG to allow access for the last security group
+
+```sh
+aws ec2 authorize-security-group-ingress \
+  --group-id $DB_SG_ID \
+  --protocol tcp \
+  --port 5432 \
+  --source-group $CRUD_SERVICE_SG \
+  --tag-specifications 'ResourceType=security-group,Tags=[{Key=Name,Value=BACKENDFLASK}]'
+```
+
+### Create backend service
+
+```sh
+aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
+```
+
+
+## Not able to use Sessions Manager to get into cluster EC2 sintance
+
+The instance can hang up for various reasons. You need to reboot and it will force a restart after 5 minutes So you will have to wait 5 minutes or after a timeout.
+
+You have to use the AWS CLI. You can't use the AWS Console. it will not work as expected.
+
+The console will only do a graceful shutdodwn The CLI will do a forceful shutdown after a period of time if graceful shutdown fails.
+
+```
+aws ec2 reboot-instances --instance-ids i-0d15aef0618733b6d
+```
+
+### Connection via Sessions Manaager (Fargate)
+https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-linux https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify
+
+Install for Ubuntu
+
+```sh
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+sudo dpkg -i session-manager-plugin.deb
+```
+
+Verify its working
+
+```sh
+session-manager-plugin
+```
+
+Connect to the container
+
+```sh
+aws ecs execute-command  \
+--region $AWS_DEFAULT_REGION \
+--cluster cruddur \
+--task 6c641661661449e7838cab029a117794 \
+--container backend-flask \
+--command "/bin/bash" \
+--interactive
+```
+
+```sh
+docker run -rm \
+-p 4567:4567 \
+-e AWS_ENDPOINT_URL="http://dynamodb-local:8000" \
+-e DATABASE_URL="postgresql://postgres:password@db:5432/cruddur" \
+-e FRONTEND_URL="https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}" \
+-e BACKEND_URL="https://4567-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}" \
+-e OTEL_SERVICE_NAME='backend-flask' \
+-e OTEL_EXPORTER_OTLP_ENDPOINT="https://api.honeycomb.io" \
+-e OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=${HONEYCOMB_API_KEY}" \
+-e AWS_XRAY_URL="*4567-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}*" \
+-e AWS_XRAY_DAEMON_ADDRESS="xray-daemon:2000" \
+-e AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}" \
+-e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
+-e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
+-e ROLLBAR_ACCESS_TOKEN="${ROLLBAR_ACCESS_TOKEN}" \
+-e AWS_COGNITO_USER_POOL_ID="${AWS_COGNITO_USER_POOL_ID}" \
+-e AWS_COGNITO_USER_POOL_CLIENT_ID="5b6ro31g97urk767adrbrdj1g5" \   
+-it backend-flask-prod
 ```

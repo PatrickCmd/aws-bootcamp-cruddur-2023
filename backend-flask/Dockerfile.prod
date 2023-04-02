@@ -14,6 +14,10 @@ ENV PYTHONUNBUFFERED 1
 
 
 # install dependencies
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg
+
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/backend-app/requirements.txt
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/backend-app/wheels -r requirements.txt
@@ -38,6 +42,10 @@ RUN mkdir $BACKEND_APP_HOME
 WORKDIR $BACKEND_APP_HOME
 
 # install dependencies
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg
+
 COPY --from=builder /usr/src/backend-app/wheels /wheels
 COPY --from=builder /usr/src/backend-app/requirements.txt .
 RUN pip install --upgrade pip
