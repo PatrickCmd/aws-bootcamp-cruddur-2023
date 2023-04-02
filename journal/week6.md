@@ -488,7 +488,7 @@ export CRUD_SERVICE_SG=$(aws ec2 describe-security-groups \
   --output text)
 ```
 
-### Update RDS SG to allow access for the last security group
+### Update RDS SG to allow access for the last security group of Cruddur backend flask service
 
 ```sh
 aws ec2 authorize-security-group-ingress \
@@ -496,8 +496,9 @@ aws ec2 authorize-security-group-ingress \
   --protocol tcp \
   --port 5432 \
   --source-group $CRUD_SERVICE_SG \
-  --tag-specifications 'ResourceType=security-group,Tags=[{Key=Name,Value=BACKENDFLASK}]'
 ```
+
+
 
 ### Create backend service
 
@@ -545,6 +546,15 @@ aws ecs execute-command  \
 --command "/bin/bash" \
 --interactive
 ```
+
+Using bash script
+
+```sh
+aws ecs list-tasks --cluster cruddur
+```
+
+```sh
+
 
 ```sh
 docker run -rm \

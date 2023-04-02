@@ -61,4 +61,7 @@ RUN chown -R app:app $BACKEND_APP_HOME
 USER app
 
 # gunicorn --bind 0.0.0.0:5000 app:app
-CMD [ "gunicorn", "--bind", "0.0.0.0:4567", "app:app"]
+# CMD [ "gunicorn", "--bind", "0.0.0.0:4567", "app:app"]
+
+# python3 -m flask run --host=0.0.0.0 --port=4567
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=4567", "--no-debug","--no-debugger","--no-reload"]
