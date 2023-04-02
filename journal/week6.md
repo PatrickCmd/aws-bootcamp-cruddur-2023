@@ -460,6 +460,16 @@ aws ec2 authorize-security-group-ingress \
   --cidr 0.0.0.0/0
 ```
 
+Authorize port `4567`
+
+```sh
+aws ec2 authorize-security-group-ingress \
+  --group-id $CRUD_SERVICE_SG \
+  --protocol tcp \
+  --port 4567 \
+  --cidr 0.0.0.0/0
+```
+
 **Sample Output**
 ```
 {
@@ -488,6 +498,36 @@ export CRUD_SERVICE_SG=$(aws ec2 describe-security-groups \
   --output text)
 ```
 
+### Create a load balancer
+
+![create load balancer](assets/week-6/create-alb-1.png)
+
+![create load balancer](assets/week-6/create-alb-2.png)
+
+![create load balancer](assets/week-6/create-alb-3.png)
+
+![create load balancer](assets/week-6/create-alb-4.png)
+
+![create load balancer](assets/week-6/create-alb-5.png)
+
+![create load balancer](assets/week-6/create-alb-6.png)
+
+Create target groups for the load balancer both for backend and frontend
+
+![create load balancer target group](assets/week-6/create-alb-tg-1.png)
+
+![create load balancer target group](assets/week-6/create-alb-tg-2.png)
+
+![create load balancer target group](assets/week-6/create-alb-tg-3.png)
+
+![create load balancer target group](assets/week-6/create-alb-tg-4.png)
+
+![create load balancer target group](assets/week-6/create-alb-tg-5.png)
+
+Edit inbound rules for crudder service security group to allow access from load balancer SG on port `4567`
+
+![edit cruddur service sg](assets/week-6/edit-cruddur-service-sg.png)
+
 ### Update RDS SG to allow access for the last security group of Cruddur backend flask service
 
 ```sh
@@ -498,13 +538,23 @@ aws ec2 authorize-security-group-ingress \
   --source-group $CRUD_SERVICE_SG \
 ```
 
-
-
 ### Create backend service
 
 ```sh
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
 ```
+
+### Test health check and home activities endpoints
+
+Test endpoints through load balancer and task service public IP.
+
+![test service public IP](assets/week-6/test-service-public-ip-1.png)
+
+![test service public IP](assets/week-6/test-service-public-ip-2.png)
+
+![test through elb](assets/week-6/test-alb-1.png)
+
+![test through elb](assets/week-6/test-alb-2.png)
 
 
 ## Not able to use Sessions Manager to get into cluster EC2 sintance
