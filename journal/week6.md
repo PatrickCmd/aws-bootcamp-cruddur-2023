@@ -37,6 +37,7 @@
 - Amazon CloudWatch to monitor Malicious ECS Configuration Changes
 - Only using Authorized Container Images (hopefully some Image signing in the future e.g sigstore)
 
+## Deploying Backend Flask Application to ECS with Fargate
 ## Test RDS Connecetion
 Add this `test` script into `db` so we can easily check our connection from our container.
 
@@ -555,6 +556,32 @@ Test endpoints through load balancer and task service public IP.
 ![test through elb](assets/week-6/test-alb-1.png)
 
 ![test through elb](assets/week-6/test-alb-2.png)
+
+## Deploying Frontend React-js Application to ECS with Fargate
+
+### For Frontend React-js
+
+Set environment Variables
+
+```sh
+export REACT_APP_BACKEND_URL="https://4567-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
+gp env REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+
+export REACT_APP_AWS_PROJECT_REGION=${AWS_DEFAULT_REGION}
+gp env REACT_APP_AWS_PROJECT_REGION=$REACT_APP_AWS_PROJECT_REGION
+
+export REACT_APP_AWS_COGNITO_REGION=${AWS_DEFAULT_REGION}
+gp env REACT_APP_AWS_COGNITO_REGION=$REACT_APP_AWS_COGNITO_REGION
+
+export REACT_APP_AWS_USER_POOLS_ID=${AWS_USER_POOL_ID}
+gp env REACT_APP_AWS_USER_POOLS_ID=$REACT_APP_AWS_USER_POOLS_ID
+
+export REACT_APP_CLIENT_ID=${AWS_APP_CLIENT_ID}
+gp env REACT_APP_CLIENT_ID=$REACT_APP_CLIENT_ID
+
+export REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID=${AWS_APP_CLIENT_ID}
+gp env REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID=$REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID
+```
 
 
 ## Not able to use Sessions Manager to get into cluster EC2 sintance
