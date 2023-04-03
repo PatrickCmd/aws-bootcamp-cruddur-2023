@@ -407,12 +407,10 @@ aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWri
 #### Create Task Definitions Json files
 - Created a new folder called aws/task-defintions and placed the following files in there:
   - [backend-flask.json](../aws/task-definitions/backend-flask.json)
-  - [frontend-react-js.json](../aws/task-definitions/frontend-react-js.json)
 
 #### Register Task Defintion
 ```sh
 aws ecs register-task-definition --cli-input-json file://aws/task-definitions/backend-flask.json
-aws ecs register-task-definition --cli-input-json file://aws/task-definitions/frontend-react-js.json
 ```
 
 ### Create Default VPC
@@ -582,6 +580,65 @@ gp env REACT_APP_CLIENT_ID=$REACT_APP_CLIENT_ID
 export REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID=${AWS_APP_CLIENT_ID}
 gp env REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID=$REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID
 ```
+
+### Create Repo
+
+```sh
+aws ecr create-repository \
+  --repository-name frontend-react-js \
+  --image-tag-mutability MUTABLE
+```
+
+### Set URL
+
+```sh
+export ECR_FRONTEND_REACT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/frontend-react-js"
+echo $ECR_FRONTEND_REACT_URL
+gp env ECR_FRONTEND_REACT_URL=$ECR_FRONTEND_REACT_URL
+```
+
+### Build Image
+
+```sh
+docker build \
+  --build-arg REACT_APP_BACKEND_URL="https://4567-$GITPOD_WORKSPACE_ID.$GITPOD_WORKSPACE_CLUSTER_HOST" \
+  --build-arg REACT_APP_AWS_PROJECT_REGION="$AWS_DEFAULT_REGION" \
+  --build-arg REACT_APP_AWS_COGNITO_REGION="$AWS_DEFAULT_REGION" \
+  --build-arg REACT_APP_AWS_USER_POOLS_ID="$AWS_USER_POOL_ID" \
+  --build-arg REACT_APP_CLIENT_ID="$AWS_APP_CLIENT_ID" \
+  -t frontend-react-js \
+  -f frontend-react-js/Dockerfile.prod \
+  ./frontend-react-js/
+```
+
+### Tag Image
+
+```sh
+docker tag frontend-react-js:latest $ECR_FRONTEND_REACT_URL:latest
+```
+
+### Push Image to ECR
+
+```sh
+docker push $ECR_FRONTEND_REACT_URL:latest
+```
+
+If you want to run and test it
+
+```sh
+docker run --rm -p 3000:3000 -it frontend-react-js
+```
+
+
+### Register Task Defintions
+
+- Created a new folder called aws/task-defintions and placed the following files in there:
+  - [frontend-react-js.json](../aws/task-definitions/frontend-react-js.json)
+
+```sh
+aws ecs register-task-definition --cli-input-json file://aws/task-definitions/frontend-react-js.json
+```
+
 
 
 ## Not able to use Sessions Manager to get into cluster EC2 sintance
