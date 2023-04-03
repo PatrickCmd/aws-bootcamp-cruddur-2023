@@ -562,7 +562,7 @@ Test endpoints through load balancer and task service public IP.
 Set environment Variables
 
 ```sh
-export REACT_APP_BACKEND_URL="https://4567-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
+export REACT_APP_BACKEND_URL="http://cruddur-alb-413812183.us-east-1.elb.amazonaws.com:4567"
 gp env REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 
 export REACT_APP_AWS_PROJECT_REGION=${AWS_DEFAULT_REGION}
@@ -601,7 +601,7 @@ gp env ECR_FRONTEND_REACT_URL=$ECR_FRONTEND_REACT_URL
 
 ```sh
 docker build \
-  --build-arg REACT_APP_BACKEND_URL="https://4567-$GITPOD_WORKSPACE_ID.$GITPOD_WORKSPACE_CLUSTER_HOST" \
+  --build-arg REACT_APP_BACKEND_URL="$REACT_APP_BACKEND_URL" \
   --build-arg REACT_APP_AWS_PROJECT_REGION="$AWS_DEFAULT_REGION" \
   --build-arg REACT_APP_AWS_COGNITO_REGION="$AWS_DEFAULT_REGION" \
   --build-arg REACT_APP_AWS_USER_POOLS_ID="$AWS_USER_POOL_ID" \
@@ -629,7 +629,6 @@ If you want to run and test it
 docker run --rm -p 3000:3000 -it frontend-react-js
 ```
 
-
 ### Register Task Defintions
 
 - Created a new folder called aws/task-defintions and placed the following files in there:
@@ -637,6 +636,12 @@ docker run --rm -p 3000:3000 -it frontend-react-js
 
 ```sh
 aws ecs register-task-definition --cli-input-json file://aws/task-definitions/frontend-react-js.json
+```
+
+### Create backend service
+
+```sh
+aws ecs create-service --cli-input-json file://aws/json/service-frontend-react-js.json
 ```
 
 
