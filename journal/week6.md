@@ -654,6 +654,10 @@ aws ec2 authorize-security-group-ingress \
 aws ecs create-service --cli-input-json file://aws/json/service-frontend-react-js.json
 ```
 
+### Testing out Loadbalancer for frontend on port `3000`
+
+![testing-lb-frontend](assets/week-6/testing-lb-frontend.png)
+
 
 
 ## Not able to use Sessions Manager to get into cluster EC2 sintance
