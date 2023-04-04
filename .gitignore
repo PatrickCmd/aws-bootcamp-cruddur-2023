@@ -1,2 +1,5 @@
 .DS_Store
 .terraform/
+docker/**/*
+frontend-react-js/build/*
+*.env

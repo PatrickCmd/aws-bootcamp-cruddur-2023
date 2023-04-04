@@ -150,19 +150,9 @@ def rollbar_test():
     return "Rollbar Testing!"
 
 
-@app.route("/api/healthcheck", methods=["GET"])
-def healthcheck():
-    # add precise checks
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT 1;")
-        cur.close()
-        resp = jsonify(health="healthy")
-        resp.status_code = 200
-    except Exception as e:
-        resp = jsonify(health="unhealthy")
-        resp.status_code = 500
-    return resp
+@app.route("/api/health-check")
+def health_check():
+    return {"success": True}, 200
 
 
 @app.route("/api/message_groups", methods=["GET"])

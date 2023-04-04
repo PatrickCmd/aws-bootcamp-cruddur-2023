@@ -4,6 +4,7 @@ gunicorn==20.1.0
 
 psycopg[binary]
 psycopg[pool]
+psycopg-pool
 
 opentelemetry-api 
 opentelemetry-sdk 

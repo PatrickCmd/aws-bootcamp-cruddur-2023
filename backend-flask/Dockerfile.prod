@@ -3,7 +3,7 @@
 ###########
 
 # pull official base image
-FROM python:3.10-slim-buster as builder
+FROM 476313879638.dkr.ecr.us-east-1.amazonaws.com/cruddur-python:3.10-slim-buster as builder
 
 # set work directory
 WORKDIR /usr/src/backend-app/
@@ -14,6 +14,10 @@ ENV PYTHONUNBUFFERED 1
 
 
 # install dependencies
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg
+
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/backend-app/requirements.txt
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/backend-app/wheels -r requirements.txt
@@ -23,7 +27,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/backend-app/wheels -
 #########
 
 # pull official base image
-FROM python:3.10-slim-buster
+FROM 476313879638.dkr.ecr.us-east-1.amazonaws.com/cruddur-python:3.10-slim-buster
 
 # create directory for the app user
 RUN mkdir -p /home/backend-app
@@ -38,6 +42,10 @@ RUN mkdir $BACKEND_APP_HOME
 WORKDIR $BACKEND_APP_HOME
 
 # install dependencies
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg
+
 COPY --from=builder /usr/src/backend-app/wheels /wheels
 COPY --from=builder /usr/src/backend-app/requirements.txt .
 RUN pip install --upgrade pip
@@ -53,4 +61,7 @@ RUN chown -R app:app $BACKEND_APP_HOME
 USER app
 
 # gunicorn --bind 0.0.0.0:5000 app:app
-CMD [ "gunicorn", "--bind", "0.0.0.0:4567", "app:app"]
+# CMD [ "gunicorn", "--bind", "0.0.0.0:4567", "app:app"]
+
+# python3 -m flask run --host=0.0.0.0 --port=4567
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=4567", "--no-debug","--no-debugger","--no-reload"]

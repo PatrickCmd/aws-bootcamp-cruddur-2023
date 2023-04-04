@@ -40,7 +40,7 @@ services:
       - db
       - dynamodb-local
     healthcheck:
-      test: ["CMD", "curl", "-f", "${BACKEND_URL}/api/healthcheck"]
+      test: ["CMD", "curl", "-f", "${BACKEND_URL}/api/health-check"]
       interval: 5s
       timeout: 10s
       retries: 3
