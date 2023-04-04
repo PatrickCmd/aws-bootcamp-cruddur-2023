@@ -676,6 +676,8 @@ session-manager-plugin
 
 Connect to the container
 
+- For backend-flask
+
 ```sh
 aws ecs execute-command  \
 --region $AWS_DEFAULT_REGION \
@@ -693,6 +695,26 @@ aws ecs list-tasks --cluster cruddur
 ```
 
 ```sh
+./backend-flask/bin/backend/connect dc500b9a2c324c82bae514012805e463
+```
+
+- For frontend-react-js
+
+```sh
+aws ecs execute-command  \
+--region $AWS_DEFAULT_REGION \
+--cluster cruddur \
+--task $TASK_ID \
+--container $CONTAINER_NAME \
+--command "/bin/sh" \
+--interactive
+```
+
+Using bash script
+
+```sh
+./backend-flask/bin/frontend/connect dc500b9a2c324c82bae514012805e463
+```
 
 
 ```sh
