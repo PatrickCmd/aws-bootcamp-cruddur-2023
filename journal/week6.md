@@ -638,7 +638,17 @@ docker run --rm -p 3000:3000 -it frontend-react-js
 aws ecs register-task-definition --cli-input-json file://aws/task-definitions/frontend-react-js.json
 ```
 
-### Create backend service
+### Authorize port `3000` on crudder service SG
+
+```sh
+aws ec2 authorize-security-group-ingress \
+  --group-id $CRUD_SERVICE_SG \
+  --protocol tcp \
+  --port 3000 \
+  --cidr 0.0.0.0/0
+```
+
+### Create frontend-react-js service
 
 ```sh
 aws ecs create-service --cli-input-json file://aws/json/service-frontend-react-js.json
