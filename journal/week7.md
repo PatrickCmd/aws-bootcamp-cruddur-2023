@@ -34,3 +34,31 @@ Use the cerificate manager to generate the SSL certificate and the create record
 
 ![request ssl certificate](./assets/week-7/request_certificate7.png)
 
+### Create hosted zone records
+
+Create records that point to the load balancer listening to both `backend` and `frontend`
+
+![create records](./assets/week-7/create_record_point_to_lb.png)
+
+![create records](./assets/week-7/create_record_point_to_lb2.png)
+
+![create records](./assets/week-7/create_record_point_to_lb3.png)
+
+## Update load balancer listeners
+
+Add a listener to redirect `HTTP` request on port `80` to `HTTPS` on port `443`
+
+![Update load balancer listeners](./assets/week-7/update_lb_listeners1.png)
+
+![Update load balancer listeners](./assets/week-7/update_lb_listeners2.png)
+
+![Update load balancer listeners](./assets/week-7/update_lb_listeners3.png)
+
+![Update load balancer listeners](./assets/week-7/update_lb_listeners4.png)
+
+### Modify listener rules
+
+![Update load balancer listeners](./assets/week-7/update_lb_listeners5_modify_rules.png)
+
+![Update load balancer listeners](./assets/week-7/update_lb_listeners6_modify_rules.png)
+
