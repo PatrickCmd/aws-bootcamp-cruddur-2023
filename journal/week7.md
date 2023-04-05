@@ -16,3 +16,21 @@ I read articles [here](https://techgenix.com/namecheap-aws-ec2-linux/) and [here
 
 ![created hosted zone](./assets/week-7/nameservers.png)
 
+## Create SSL Certificate and Create records in route 53
+
+Use the cerificate manager to generate the SSL certificate and the create records in route 53.
+
+![request ssl certificate](./assets/week-7/request_certificate1.png)
+
+![request ssl certificate](./assets/week-7/request_certificate2.png)
+
+![request ssl certificate](./assets/week-7/request_certificate3.png)
+
+![request ssl certificate](./assets/week-7/request_certificate4.png)
+
+![request ssl certificate](./assets/week-7/request_certificate5_create_records.png)
+
+![request ssl certificate](./assets/week-7/request_certificate6_create_records.png)
+
+![request ssl certificate](./assets/week-7/request_certificate7.png)
+
