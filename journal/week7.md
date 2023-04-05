@@ -62,3 +62,60 @@ Add a listener to redirect `HTTP` request on port `80` to `HTTPS` on port `443`
 
 ![Update load balancer listeners](./assets/week-7/update_lb_listeners6_modify_rules.png)
 
+## Modify backend task definition environments
+
+Update the environments for both the `frontend_url` and `backend_url` in the [backend-flask task definiton](../aws/task-definitions/backend-flask.json) with the correct values.
+
+```json
+{
+    "name": "FRONTEND_URL",
+    "value": "https://cruddurcorecodecmdsystems.website"
+},
+{
+    "name": "BACKEND_URL",
+    "value": "https://api.cruddurcorecodecmdsystems.website"
+}
+```
+
+### Re-build frontend Image with correct `backend_url`
+
+This helps to resolve the connection error as seen below
+
+![connection error](./assets/week-7/connection_error.png)
+
+
+```sh
+export REACT_APP_BACKEND_URL="api.cruddurcorecodecmdsystems.website"
+gp env REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+```
+
+```sh
+docker build \
+  --build-arg REACT_APP_BACKEND_URL="$REACT_APP_BACKEND_URL" \
+  --build-arg REACT_APP_AWS_PROJECT_REGION="$AWS_DEFAULT_REGION" \
+  --build-arg REACT_APP_AWS_COGNITO_REGION="$AWS_DEFAULT_REGION" \
+  --build-arg REACT_APP_AWS_USER_POOLS_ID="$AWS_USER_POOL_ID" \
+  --build-arg REACT_APP_CLIENT_ID="$AWS_APP_CLIENT_ID" \
+  -t frontend-react-js \
+  -f frontend-react-js/Dockerfile.prod \
+  ./frontend-react-js/
+```
+
+### Re-tag Image
+
+```sh
+docker tag frontend-react-js:latest $ECR_FRONTEND_REACT_URL:latest
+```
+
+### Re-push Image to ECR
+
+```sh
+docker push $ECR_FRONTEND_REACT_URL:latest
+```
+
+### Update backend service deployment
+
+Forcefully update the backend service deployment to used the latest revision of the backend task definition.
+
+![Update backend service deployment](./assets/week-7/update_backend_service_deployment.png)
+
