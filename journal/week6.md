@@ -751,3 +751,6 @@ docker run -rm \
 -e AWS_COGNITO_USER_POOL_CLIENT_ID="5b6ro31g97urk767adrbrdj1g5" \   
 -it backend-flask-prod
 ```
+
+## Solving CORS with a Load Balancer and Custom Domain
+See Continuation to [Week 7 Journal](./week7.md)
