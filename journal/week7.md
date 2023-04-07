@@ -153,3 +153,18 @@ You should use an absolute URL, something like: http://localhost:5000/users to s
 
 ![data successfully fetched](./assets/week-7/data_displayed.png)
 
+
+## Securing Backend Flask
+
+Some sample instructions to follow can be found in the flask documentation [here](https://flask.palletsprojects.com/en/2.2.x/debugging/)
+
+### 1. Modify the inbound rules of the security group of the load balancer to work for ports `443` and `80` using only the IP from the load Balancer.
+
+From
+
+![edit inbound alb rules](./assets/week-7/edit_inbound_alb_rules1.png)
+
+To
+
+![edit inbound alb rules](./assets/week-7/edit_inbound_alb_rules2.png)
+
