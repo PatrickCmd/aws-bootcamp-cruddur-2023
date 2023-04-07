@@ -8,10 +8,6 @@ Implemented a couple of scripts for loading schema, dropping tables and seed dat
 
 To test out the scripts and access patterns locally, I ran the scritps with the commands below.
 
-```sh
-cd ${THEIA_WORKSPACE_ROOT}/backend-flask
-```
-
 To create a sample table `cruddur-messages`, I load the schema using the script below
 
 ```sh

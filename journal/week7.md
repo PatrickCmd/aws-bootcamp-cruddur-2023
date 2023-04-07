@@ -125,6 +125,15 @@ Forcefully update the backend service deployment to used the latest revision of 
 
 ![Update backend service deployment](./assets/week-7/update_backend_service_deployment.png)
 
+### Run all commands at once
+
+```sh
+./bin/frontend/build
+./bin/frontend/push
+./bin/frontend/register
+./bin/frontend/deploy
+```
+
 
 ## Error backend url concatenated to frontend host
 
