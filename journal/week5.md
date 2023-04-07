@@ -506,3 +506,63 @@ def lambda_handler(event, context):
 - [Josh Hargett](https://medium.com/@joshhargett.jh)
 
 I have not been writing blogs, though I have found Josh Hargett's medium blogs as a good motivator to start thinking also putting out my work out their as simple contribution to the tech community.
+
+
+## DynamoDB CheatSheet [AWS Fundamentals Infrographics]
+![dynamodb cheatsheet](./assets/week-5/dynamodb_cheetsheet.jpg)
+
+
+## More about DynamoDB (Single Table Design)
+**Youtube resources**: 
+- [AWS re:Invent 2021 - Data modeling with Amazon DynamoDB [REPEAT]](https://www.youtube.com/watch?v=yNOVamgIXGQ)
+- [7 Common DynamoDB Patterns for Modeling and Building an App with Alex De Brie](https://www.youtube.com/watch?v=Q6-qWdsa8a4)
+- [Designing a DynamoDB Table in 4 Steps: From Entities to Access Patterns](https://www.youtube.com/watch?v=JLZOI8patlw)
+
+### Modelling for an Ecommerce Application
+
+### Transcript
+
+See transcript [here](./dynamodb_transcript.md)
+
+#### Entities
+- **Product**: it represents a product in the application
+  - Id
+  - Name
+  - Description
+  - Price
+  - Category
+  - Images
+  - Amount sold
+  - Writer Id (the user that created it)
+
+- **Users**: A user is a registered user in the application
+  - Email(used as an id)
+  - First name
+  - Last name
+
+- **Order**: A user can purcahse a set of items on a date for a total amount.
+  - Id
+  - User
+  - Purchase date
+  - Status - finalized / active (this is for the shopping cart)
+  - Total amount
+  - Total items
+  - [Item list]
+
+- **OrderItems**: Items the user purchased or want purchase
+  - OrderId
+  - ProductId
+  - UserId
+  - Quantity
+  - Title
+  - Image
+  - Total amount
+
+#### Relational Diagram
+![relational diagram](./assets/week-5/relational_diagram_ecommerce.png)
+
+#### Sample Access Patterns
+
+![sample access patterns](./assets/week-5/sample_access_patterns.png)
+
+![table diagram](./assets/week-5/table_diagram.png)
