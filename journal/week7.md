@@ -113,6 +113,12 @@ docker tag frontend-react-js:latest $ECR_FRONTEND_REACT_URL:latest
 docker push $ECR_FRONTEND_REACT_URL:latest
 ```
 
+### Register Task Defintions
+
+```sh
+aws ecs register-task-definition --cli-input-json file://aws/task-definitions/frontend-react-js.json
+```
+
 ### Update backend service deployment
 
 Forcefully update the backend service deployment to used the latest revision of the backend task definition.
