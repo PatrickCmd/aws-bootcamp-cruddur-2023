@@ -177,3 +177,13 @@ To
 
 ![edit inbound alb rules](./assets/week-7/edit_inbound_alb_rules2.png)
 
+
+## Improve docker networking
+
+### Create docker network
+
+```sh
+docker network create cruddur-net
+```
+
+Update the [docker-compose.yml](../docker-compose.yml) file for all services to have the `crudder-net` network created above.
