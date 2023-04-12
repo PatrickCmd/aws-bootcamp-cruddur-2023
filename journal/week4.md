@@ -10,7 +10,6 @@ The last final implementations for this week were done with both gitpod and code
 ### Setting up codespaces environment
 ```sh
 export CODESPACES_IP=$(curl ifconfig.me)
-cd backend-flask
 ./bin/rds/update-sg-rule CODDESPACES
 ```
 
@@ -198,7 +197,6 @@ Reference the `bin` folder to see the full files [here](../backend-flask/bin/)
 ### Change permissions for the binary files to be executable for the user
 
 ```sh
-cd backend-flask
 chmod u+x bin/*
 cd ../
 ```
@@ -264,9 +262,7 @@ gp env DB_SG_RULE_ID="${DB_SG_RULE_ID}"
 Whenever we need to update our security groups we can do this for access.
 
 ```sh
-cd ${THEIA_WORKSPACE_ROOT}/backend-flask
 source bin/rds/update-sg-rule GITPOD
-cd $THEIA_WORKSPACE_ROOT
 ```
 
 ![AWS RDS SG](assets/week-4/aws_rds_update_sg.png)
@@ -318,7 +314,6 @@ Updated [.gitpod.yml](../.gitpod.yml) file to set `GITPOD IPAddress` and update 
 ### Load Schema and connect to production database
 
 ```sh
-cd ${THEIA_WORKSPACE_ROOT}/backend-flask
 ./bin/db/schema-load prod
 ```
 
@@ -559,7 +554,6 @@ Implemented creating activities endpoint and wiring it with the frontend. See fu
 ### Checking for created activities in production database (AWS RDS Instance)
 
 ```sh
-cd backend-flask
 ./bin/db/connect prod
 ```
 

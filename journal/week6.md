@@ -64,10 +64,8 @@ finally:
 Make file executable and test with production RDS instance
 
 ```sh
-cd ${THEIA_WORKSPACE_ROOT}/backend-flask
 chmod u+x bin/db/test
 ./bin/db/test
-cd $THEIA_WORKSPACE_ROOT
 ```
 
 ## Task Flask Script
@@ -237,7 +235,7 @@ gitpod /workspace/aws-bootcamp-cruddur-2023 (week-6) $ aws ecr create-repository
 aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
 ```
 
-Also created bash script for `ECR` login. Reference at [ecr/login](../backend-flask/bin/ecr/login)
+Also created bash script for `ECR` login. Reference at [ecr/login](../bin/ecr/login)
 
 ### Set URL
 ```sh
@@ -543,6 +541,15 @@ aws ec2 authorize-security-group-ingress \
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
 ```
 
+### Run all commands at once
+
+```sh
+./bin/backend/build
+./bin/backend/push
+./bin/backend/register
+./bin/backend/deploy
+```
+
 ### Test health check and home activities endpoints
 
 Test endpoints through load balancer and task service public IP.
@@ -654,6 +661,15 @@ aws ec2 authorize-security-group-ingress \
 aws ecs create-service --cli-input-json file://aws/json/service-frontend-react-js.json
 ```
 
+### Run all commands at once
+
+```sh
+./bin/frontend/build
+./bin/frontend/push
+./bin/frontend/register
+./bin/frontend/deploy
+```
+
 ### Testing out Loadbalancer for frontend on port `3000`
 
 ![testing-lb-frontend](assets/week-6/testing-lb-frontend.png)
@@ -709,7 +725,7 @@ aws ecs list-tasks --cluster cruddur
 ```
 
 ```sh
-./backend-flask/bin/backend/connect dc500b9a2c324c82bae514012805e463
+./bin/backend/connect dc500b9a2c324c82bae514012805e463
 ```
 
 - For frontend-react-js
@@ -727,7 +743,7 @@ aws ecs execute-command  \
 Using bash script
 
 ```sh
-./backend-flask/bin/frontend/connect dc500b9a2c324c82bae514012805e463
+./bin/frontend/connect dc500b9a2c324c82bae514012805e463
 ```
 
 

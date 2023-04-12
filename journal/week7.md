@@ -125,6 +125,15 @@ Forcefully update the backend service deployment to used the latest revision of 
 
 ![Update backend service deployment](./assets/week-7/update_backend_service_deployment.png)
 
+### Run all commands at once
+
+```sh
+./bin/frontend/build
+./bin/frontend/push
+./bin/frontend/register
+./bin/frontend/deploy
+```
+
 
 ## Error backend url concatenated to frontend host
 
@@ -153,3 +162,86 @@ You should use an absolute URL, something like: http://localhost:5000/users to s
 
 ![data successfully fetched](./assets/week-7/data_displayed.png)
 
+
+## Securing Backend Flask
+
+Some sample instructions to follow can be found in the flask documentation [here](https://flask.palletsprojects.com/en/2.2.x/debugging/)
+
+### 1. Modify the inbound rules of the security group of the load balancer to work for ports `443` and `80` using only the IP from the load Balancer.
+
+From
+
+![edit inbound alb rules](./assets/week-7/edit_inbound_alb_rules1.png)
+
+To
+
+![edit inbound alb rules](./assets/week-7/edit_inbound_alb_rules2.png)
+
+
+## Improve docker networking
+
+### Create docker network
+
+```sh
+docker network create cruddur-net
+```
+
+Update the [docker-compose.yml](../docker-compose.yml) file for all services to have the `crudder-net` network created above.
+
+```yml
+networks:
+  - cruddur-net
+```
+
+Also change the network section to a user defined network.
+
+```yml
+networks: 
+  cruddur-net:
+    driver: bridge
+    name: cruddur-net
+```
+
+## Generate environment variables with ruby
+
+Generate the `env` files for both backend and frontend
+
+```sh
+./bin/backend/generate-env
+./bin/frontend/generate-env
+```
+
+Update both the `backend` and `frontend` services to use both the generated environment files in the [docker-compose](../docker-compose.yml) file.
+
+```yml
+backend-flask:
+    env_file:
+      - backend-flask.env
+```
+
+```yml
+frontend-react-js:
+    env_file:
+      - frontend-react-js.env
+```
+
+
+## Amazon Route53 -  Security Best Practices - AWS
+- Integration with ACM (Amazon Certificate Manager) for TLS
+- Compliance standard is what your business requires for a DNS provider.
+- Amazon Organizations SCP - to manage Route53 actions like creation, deletion, modification of production URIs etc.
+- AWS CloudTrail is enabled and monitored to trigger alerts for malicious activities e.g Associate VPC with Hosted Zone, Change Resource Sets, Register Domain etc.
+- GuardDuty is enabled for monitoring suspicious DNS comms (e.g Crypto-mining etc) and automated for auto-remediation.
+- AWS Config Rules is enabled in the account and region of ECS.
+
+## Amazon Route53 -  Security Best Practices - Application
+- Access Control - Roles or IAM Users for making DNS changes in Amazon Route53.
+- Public vs Private Hosted Zones.
+- All Route53 records should point to an existing DNS, ELB, ALB or AWS S3.
+  - Watch out for Dangling DNS domains.
+- Hosted Zone Configuration Changes limited to small set of people.
+- Enable Encryption in Transit using TLS/SSL certification e.g HTTPS Urls.
+- Only use Trusted Domain Providers for requesting new DNSs.
+- Set TTLs appropriately to afford to wait for a change to take effect.
+- Ensure Root Domain Alias Record Points to ELB.
+- Develop process for continuously verifying if DNS (& Hosted Zore) are all current and valid.
