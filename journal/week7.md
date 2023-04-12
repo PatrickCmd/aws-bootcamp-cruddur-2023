@@ -187,3 +187,40 @@ docker network create cruddur-net
 ```
 
 Update the [docker-compose.yml](../docker-compose.yml) file for all services to have the `crudder-net` network created above.
+
+```yml
+networks:
+  - cruddur-net
+```
+
+Also change the network section to a user defined network.
+
+```yml
+networks: 
+  cruddur-net:
+    driver: bridge
+    name: cruddur-net
+```
+
+## Generate environment variables with ruby
+
+Generate the `env` files for both backend and frontend
+
+```sh
+./bin/backend/generate-env
+./bin/frontend/generate-env
+```
+
+Update both the `backend` and `frontend` services to use both the generated environment files in the [docker-compose](../docker-compose.yml) file.
+
+```yml
+backend-flask:
+    env_file:
+      - backend-flask.env
+```
+
+```yml
+frontend-react-js:
+    env_file:
+      - frontend-react-js.env
+```

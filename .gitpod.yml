@@ -2,7 +2,7 @@ tasks:
   - name: aws-cli
     env:
       AWS_CLI_AUTO_PROMPT: on-partial
-    init: |
+    before: |
       cd /workspace
       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
       unzip awscliv2.zip
@@ -10,7 +10,7 @@ tasks:
       source "$THEIA_WORKSPACE_ROOT/bin/ecr/login"
       cd $THEIA_WORKSPACE_ROOT
   - name: postgres-gitpod-ipaddress-aws-sg
-    init: |
+    before: |
       curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
       echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee  /etc/apt/sources.list.d/pgdg.list
       sudo apt update
@@ -21,12 +21,14 @@ tasks:
       source  "$THEIA_WORKSPACE_ROOT/bin/rds/update-sg-rule" GITPOD
       source "$THEIA_WORKSPACE_ROOT/bin/rds/start-rds-instance"
   - name: frontend-node-modules
-    init: |
+    command: |
+      source  "$THEIA_WORKSPACE_ROOT/bin/frontend/generate-env"
       cd ${THEIA_WORKSPACE_ROOT}/frontend-react-js
       npm i
       cd $THEIA_WORKSPACE_ROOT
   - name: flask
     command: |
+      source "$THEIA_WORKSPACE_ROOT/bin/backend/generate-env"
       cd ${THEIA_WORKSPACE_ROOT}/backend-flask
       pip install -r requirements.txt
       cd $THEIA_WORKSPACE_ROOT
@@ -36,7 +38,7 @@ tasks:
       sudo dpkg -i session-manager-plugin.deb
       cd backend-flask
   - name: terraform
-    init: |
+    before: |
       sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
       curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
       sudo apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
