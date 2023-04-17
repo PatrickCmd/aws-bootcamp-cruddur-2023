@@ -80,6 +80,9 @@ cdk synth
 cdk deploy
 ```
 
+![cdk stack deployed](./assets/week-8/thumbingserverlesscdkstack.png)
+
+
 ### List Stacks
 
 ```sh
