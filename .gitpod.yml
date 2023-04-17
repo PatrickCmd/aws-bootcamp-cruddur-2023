@@ -45,6 +45,11 @@ tasks:
       cd thumbing-serverless-cdk
       cp .env.example .env
       npm i
+  - name: lambda-process-images
+    before: |
+      cd ${THEIA_WORKSPACE_ROOT}/aws/lambdas/process-images
+      npm i
+      cd ${THEIA_WORKSPACE_ROOT}
   - name: terraform
     before: |
       sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl

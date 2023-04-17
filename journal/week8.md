@@ -230,3 +230,25 @@ const snsPublishPolicy = this.createPolicySnSPublish(snsTopic.topicArn)
 lambda.addToRolePolicy(s3ReadWritePolicy);
 lambda.addToRolePolicy(snsPublishPolicy);
 ```
+
+## Serving Images Via CloudFront (AWS CDN)
+
+![Create cloudfront distribution](assets/week-8/croudfront1.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront2-create-control-setting.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront3.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront4.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront5.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront6.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront7.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront8-edit-bucket-policy.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront9-create-record-for-assets.png)
+
+![Create cloudfront distribution](assets/week-8/croudfront10-test-url.png)
