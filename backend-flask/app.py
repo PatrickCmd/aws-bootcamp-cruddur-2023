@@ -86,9 +86,11 @@ FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 
 # AWS X-RAY --------------------
+"""
 xray_url = os.getenv("AWS_XRAY_URL")
 xray_recorder.configure(service="backend-flask", dynamic_naming=xray_url)
 XRayMiddleware(app, xray_recorder)
+"""
 
 # Rollbar ------------------
 rollbar_access_token = os.getenv("ROLLBAR_ACCESS_TOKEN")
