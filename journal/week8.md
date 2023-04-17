@@ -46,8 +46,8 @@ const bucket = new s3.Bucket(this, 'ThumbingBucket', {
 ```
 
 ```sh
-export THUMBING_BUCKET_NAME="cmd-cruddur-thumbs"
-gp env THUMBING_BUCKET_NAME="cmd-cruddur-thumbs"
+export THUMBING_BUCKET_NAME="assets.cruddurcorecodecmdsystems.website"
+gp env THUMBING_BUCKET_NAME="assets.cruddurcorecodecmdsystems.website"
 ```
 
 - [Bucket Construct](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_s3.Bucket.html)
