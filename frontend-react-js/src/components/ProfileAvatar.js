@@ -9,7 +9,7 @@ export default function ProfileAvatar(props) {
   };
 
   return (
-    <div 
+    <div
       className="profile-avatar"
       style={styles}
     ></div>
