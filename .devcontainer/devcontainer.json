@@ -18,7 +18,8 @@
 				"ms-python.python",
 				"vscodevim.vim",
 				"hashicorp.terraform",
-				"ckolkman.vscode-postgres"
+				"ckolkman.vscode-postgres",
+				"rangav.vscode-thunder-client"
 			],
 			"settings": {
 				"terminal.integrated.fontSize": 12,
