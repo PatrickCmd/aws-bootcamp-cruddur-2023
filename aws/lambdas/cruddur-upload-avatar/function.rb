@@ -10,7 +10,7 @@ def handler(event:, context:)
     { 
       headers: {
         "Access-Control-Allow-Headers": "*, Authorization",
-        "Access-Control-Allow-Origin": "https://patrickcmd-expert-fiesta-gp7jx5r6p7hvw7w-3000.preview.app.github.dev",
+        "Access-Control-Allow-Origin": "https://3000-patrickcmd-awsbootcampc-fzjlc7ol4f2.ws-eu95.gitpod.io",
         "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
       },
       statusCode: 200
@@ -38,7 +38,7 @@ def handler(event:, context:)
     { 
       headers: {
         "Access-Control-Allow-Headers": "*, Authorization",
-        "Access-Control-Allow-Origin": "https://patrickcmd-expert-fiesta-gp7jx5r6p7hvw7w-3000.preview.app.github.dev",
+        "Access-Control-Allow-Origin": "https://3000-patrickcmd-awsbootcampc-fzjlc7ol4f2.ws-eu95.gitpod.io",
         "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
       },
       statusCode: 200, 

@@ -251,6 +251,8 @@ lambda.addToRolePolicy(snsPublishPolicy);
 
 ![Create cloudfront distribution](assets/week-8/croudfront9-create-record-for-assets.png)
 
+![Create cloudfront distribution](assets/week-8/create-s3-api-gateway10-configure-cors-add-proxy-route.png)
+
 ![Create cloudfront distribution](assets/week-8/croudfront10-test-url.png)
 
 ## API GATEWAY and PreSigned URL Lambda with Ruby
