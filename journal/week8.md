@@ -257,3 +257,9 @@ lambda.addToRolePolicy(snsPublishPolicy);
 
 ## API GATEWAY and PreSigned URL Lambda with Ruby
 
+### Publish lambda layer for ruby-jwt 2.7 runtime
+
+```sh
+./bin/lambda-layers/ruby-jwt
+```
+
