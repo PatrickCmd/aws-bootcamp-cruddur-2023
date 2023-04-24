@@ -1,5 +1,9 @@
 FROM 476313879638.dkr.ecr.us-east-1.amazonaws.com/cruddur-python:3.10-slim-buster
 
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /backend-flask
 
 COPY requirements.txt requirements.txt
