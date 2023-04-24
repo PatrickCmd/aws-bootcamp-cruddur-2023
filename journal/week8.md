@@ -2,6 +2,8 @@
 
 ## AWS CDK with TypeScript
 
+Setup CDK for deploying infrastructure for image processing. See full implementation [here](../thumbing-serverless-cdk) in the [lib](../thumbing-serverless-cdk/lib) directory.
+
 ### New Directory
 Lets contain our cdk pipeline in a new top level directory called:
 
