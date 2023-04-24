@@ -348,3 +348,9 @@ Add host zone record via Route53
 CORS can become a big problem, so the example below is a CORS configuration to allow origins from anywhere (**I don't think this is the best solution for this configuration**).
 ![Upload a Binary File to Amazon S3 Bucket using Pre-Signed URL](assets/week-8/create-s3-api-gateway9-configure-cors.png)
 
+
+### Test edit profile and render avatars via cloudfront
+
+![test-edit-profile](assets/week-8/test-edit-profile.png)
+
+![test-edit-profile](assets/week-8/render-avatar-via-cloudfront.png)
