@@ -196,7 +196,7 @@ cfn-guard test -r /workspace/aws-bootcamp-cruddur-2023/aws/cfn/ecs-cluster.guard
 - [CIDR.xyz](https://cidr.xyz/)
 
 
-Create a VPC
+**Create a VPC**
 
 ```yml
 AWSTemplateFormatVersion: 2010-09-09
@@ -232,7 +232,27 @@ Resources:
           Value: !Sub "${AWS::StackName}VPC"
 ```
 
-Under resources we create an Internet Gateway and attach it to a VPC.
+This is an AWS CloudFormation template that defines a base networking infrastructure for an AWS stack, including a Virtual Private Cloud (VPC), an Internet Gateway (IGW), a route table with routes to the IGW and to the local network, and six subnets associated with the route table, three of which are public and three of which are private.
+
+The template takes a single parameter, `VpcCidrBlock`, which specifies the IPv4 CIDR block for the VPC. The default value for this parameter is `10.0.0.0/16`.
+
+The `Resources` section of the template defines the AWS resources that will be created. The `VPC` resource is defined using the `AWS::EC2::VPC` type, and its properties include the CIDR block specified by the `VpcCidrBlock` parameter, and tags that include the stack name.
+
+The other resources defined in the template include an `InternetGateway`, a `RouteTable` with routes to the IGW and to the local network, and six subnets, three public and three private, explicitly associated with the route table. The subnets are numbered from 1 to 3 for both the public and private subnets. The specific properties for these resources are not defined in this template excerpt.
+
+In this CloudFormation template, the `Tags` section is used to apply metadata to the VPC resource that will be created. Metadata is simply additional information that is attached to resources, such as name, owner, purpose, etc. 
+
+The `Tags` section contains a list of tag objects. Each tag object has two properties: `Key` and `Value`. `Key` is the name of the metadata item, and `Value` is the value of the metadata item.
+
+In this specific example, the `Tags` section applies a single tag to the VPC resource. The tag's `Key` is "Name" and the `Value` is set using a `!Sub` intrinsic function, which substitutes values from other parts of the CloudFormation template.
+
+`${AWS::StackName}` is a pre-defined parameter in AWS CloudFormation that represents the name of the stack that is being created. By using `${AWS::StackName}` in the `!Sub` function, we are able to dynamically set the name of the VPC resource to be created to be `${AWS::StackName}VPC`. This allows us to create a unique name for the VPC based on the name of the stack, which makes it easier to manage and identify resources in AWS.
+
+![CloudFormation Networking](assets/week-10/cloudformation-11-networking-vpc.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-11-networking-vpc-2.png)
+
+**Under resources we create an Internet Gateway and attach it to a VPC**.
 
 ```yml
 Resources:
@@ -261,7 +281,20 @@ Resources:
       InternetGatewayId: !Ref IGW
 ```
 
-Create Route table and attache route to an InternetGateway (Again under resources)
+The resource section above defines the Internet Gateway (IGW) resource and the attachment of the Internet Gateway to the VPC.
+
+The Internet Gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between instances in a VPC and the internet. It's an essential component to allow traffic to flow from a VPC to the internet and vice versa.
+
+In this CloudFormation template, the Internet Gateway is created by defining a resource of type `AWS::EC2::InternetGateway`. The `Tags` property is an optional property used to tag the resource with metadata. In this case, the tag `Name` is defined, and its value is set using the `!Sub` intrinsic function. `!Sub` is used to substitute a string with variable values at runtime. In this case, `${AWS::StackName}` refers to the name of the CloudFormation stack, and the string `"IGW"` is appended to it to create a unique name for the Internet Gateway.
+
+The resource `AttachIGW` is of type `AWS::EC2::VPCGatewayAttachment`. It's used to attach the previously created Internet Gateway resource to the VPC. The `VpcId` property is set to `!Ref VPC`, which refers to the `VPC` resource defined earlier in the template. The `InternetGatewayId` property is set to `!Ref IGW`, which refers to the `IGW` resource defined earlier. This resource will create a route table with an internet route to the IGW, which allows resources within the public subnets to access the internet.
+
+![CloudFormation Networking](assets/week-10/cloudformation-12-networking-igw.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-13-networking-igw-rt.png)
+
+
+**Create Route table and attache route to an InternetGateway (Again under resources)**
 
 ```yml
 RouteTable:
@@ -282,6 +315,32 @@ RouteTable:
       DestinationCidrBlock: 0.0.0.0/0
 ```
 
-Associate subnets with the VPC both public and private. Public subnets can associated with Internet Gateway.
+This CloudFormation template creates an EC2 route table for the VPC. The template defines two resources: a route table and a route to the Internet Gateway.
+
+The first resource, `RouteTable`, creates an EC2 route table and attaches it to the VPC specified in the `VpcId` property, which is set to the `!Ref VPC` function. The `Tags` property allows you to add metadata to your resources for easier identification. In this case, it sets the name of the route table to the name of the CloudFormation stack.
+
+The second resource, `RouteToIGW`, creates a route from the route table to the Internet Gateway specified by the `GatewayId` property, which is set to the `!Ref IGW` function. The `DependsOn` property ensures that the Internet Gateway attachment is complete before the route is added to the route table. The `DestinationCidrBlock` property specifies that all traffic not destined for the VPC should be routed to the Internet Gateway.
+
+
+**Associate subnets with the VPC both public and private. Public subnets can associated with Internet Gateway**.
+
 See full template implementation [here](../aws/cfn/networking/template.yaml)
+
+![CloudFormation Networking](assets/week-10/cloudformation-14-networking-changeset.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-15-networking-new-subnet-resources.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-16-networking-new-created-resources.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-17-networking-parameters.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-18-networking-new-vpc-route-resourcemap.png)
+
+![CloudFormation Networking](assets/week-10/cloudformation-19-networking-route-table-subnet-associations.png)
+
+### YAML Tutorial Tutorials and Cheatsheets
+
+- [YAML Tutorial: Everything You Need to Get Started in Minutes Written by: Erik Francis](https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started)
+- [YAML Cheat Sheet - LZone](https://lzone.de/cheat-sheet/YAML)
+- [YAML cheatsheet - Quickref](https://quickref.me/yaml.html)
 
