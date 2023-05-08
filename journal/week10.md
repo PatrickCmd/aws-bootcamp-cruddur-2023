@@ -351,3 +351,26 @@ See full template implementation [here](../aws/cfn/networking/template.yaml)
 - [YAML Cheat Sheet - LZone](https://lzone.de/cheat-sheet/YAML)
 - [YAML cheatsheet - Quickref](https://quickref.me/yaml.html)
 
+
+## AWS CloudFormation Cluster Layer
+
+See full implementation of the cloudformation template [here](../aws/cfn/cluster/template.yaml)
+
+This is a CloudFormation template, which describes the infrastructure that's to be created on AWS. The template describes a network and cluster configuration to support Fargate containers. The template creates various AWS resources, including an ECS Fargate Cluster, an Application Load Balancer (ALB), an ALB security group, HTTPS and HTTP listeners, Backend and Frontend Target Groups, and other components required for networking.
+
+Here is an overview of what the different parts of the template do:
+
+- AWSTemplateFormatVersion: This defines the CloudFormation template version used in this configuration.
+- Description: This provides a brief description of the resources that will be created.
+- Parameters: This defines input parameters that can be used to customize the CloudFormation stack.
+- Resources: This section defines the AWS resources that will be created as part of the CloudFormation stack.
+  - FargateCluster: This creates an ECS Fargate Cluster to run Fargate containers.
+  - ALB: This creates an Application Load Balancer that is internet-facing and accepts only IPv4 traffic. A certificate attached from the Amazon Certification Manager is also attached to this ALB.
+  - HTTPSListener: This creates an HTTPS listener for the ALB that sends naked domain traffic to a Frontend Target Group and api subdomain traffic to a Backend Target Group.
+  - HTTPListener: This creates an HTTP listener for the ALB that redirects to the HTTPS listener.
+  - Backend Target Group: This defines the Backend Target Group used by the ALB.
+  - Frontend Target Group: This defines the Frontend Target Group used by the ALB. 
+
+The Parameters section defines input parameters used by the template. These include the NetworkingStack parameter, which defines the base layer of networking components (e.g. VPC, subnets), and the CertificateArn parameter, which defines the Amazon Certification Manager (ACM) certificate ARN. The Frontend and Backend parameters define the port, health check interval, health check path, health check port, health check protocol, health check timeout, healthy threshold count, and unhealthy threshold count for the Frontend and Backend Target Groups. 
+
+Overall, this CloudFormation template provides a robust network and cluster configuration to support Fargate containers and load balancing traffic between frontend and backend Target Groups.

@@ -9,7 +9,7 @@ cfn-lint $CFN_PATH
 BUCKET=$CFN_BUCKET
 
 aws cloudformation deploy \
-  --stack-name "cruddur" \
+  --stack-name "cruddurNet" \
   --s3-bucket $BUCKET \
   --template-file "$CFN_PATH" \
   --no-execute-changeset \
