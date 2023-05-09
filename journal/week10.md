@@ -194,7 +194,7 @@ cfn-guard test -r /workspace/aws-bootcamp-cruddur-2023/aws/cfn/ecs-cluster.guard
 
   ![Cruddur Networking Layer](assets/week-10/Cruddur-Network-Layer.png)
 
-  See Lucidchart diagram [here](https://lucid.app/lucidchart/db55c666-f3fb-4573-bd94-21e6b7a31da6/edit?viewport_loc=489%2C-1205%2C2219%2C1040%2C0_0&invitationId=inv_46cab791-136a-4af2-9250-7575ed6584b0)
+  See Lucidchart diagram [here](https://lucid.app/lucidchart/db55c666-f3fb-4573-bd94-21e6b7a31da6/edit?viewport_loc=489%2C-1243%2C2219%2C1043%2C0_0&invitationId=inv_46cab791-136a-4af2-9250-7575ed6584b0)
 
 ### An interactive IP address and CIDR range visualizer
 - [CIDR.xyz](https://cidr.xyz/)
