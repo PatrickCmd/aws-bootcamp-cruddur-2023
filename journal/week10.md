@@ -354,6 +354,11 @@ See full template implementation [here](../aws/cfn/networking/template.yaml)
 
 ## AWS CloudFormation Cluster Layer
 
+[**Network Cluster Diagram**](https://lucid.app/lucidchart/db55c666-f3fb-4573-bd94-21e6b7a31da6/edit?viewport_loc=-4%2C-1229%2C2219%2C1040%2C0_0&invitationId=inv_46cab791-136a-4af2-9250-7575ed6584b0)
+
+![Network Cluster Layers](assets/week-10/Cruddur-Network-Cluster-Layer.png)
+
+
 See full implementation of the cloudformation template [here](../aws/cfn/cluster/template.yaml)
 
 This is a CloudFormation template, which describes the infrastructure that's to be created on AWS. The template describes a network and cluster configuration to support Fargate containers. The template creates various AWS resources, including an ECS Fargate Cluster, an Application Load Balancer (ALB), an ALB security group, HTTPS and HTTP listeners, Backend and Frontend Target Groups, and other components required for networking.
@@ -403,3 +408,6 @@ Resources created after executing change-set
 
 Exported outputs to be referenced by other cloudformation stacks when needed.
 ![CFN Cluster layer](assets/week-10/cloudformation-22-cluster-layer-exported-outputs.png)
+
+
+[**Continue to Week-11 Module**](./week11.md)
