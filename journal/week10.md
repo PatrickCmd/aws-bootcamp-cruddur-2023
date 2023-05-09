@@ -5,13 +5,65 @@
 
 AWS CloudFormation is a service provided by Amazon Web Services (AWS) that allows you to model and provision AWS resources and infrastructure in an automated and scalable manner. 
 
-Using CloudFormation, you can define and manage infrastructure as code, which allows you to declare your desired configuration in a template, and CloudFormation takes care of provisioning and configuring the necessary resources in your AWS account. 
+Using CloudFormation, you can define and manage **infrastructure as code (iac)**, which allows you to declare your desired configuration in a template, and CloudFormation takes care of provisioning and configuring the necessary resources in your AWS account. 
 
 This helps simplify the process of creating and managing infrastructure and reduces the potential for human error. CloudFormation templates can be written in `YAML` or `JSON` and can be stored in version control for easy management and collaboration. 
 
 With CloudFormation, you can create and manage a variety of AWS resources including EC2 instances, RDS databases, S3 buckets, IAM roles, and more. You can also use CloudFormation to create, update, and delete entire stacks of resources as a single unit. 
 
 Overall, CloudFormation helps make the process of creating and managing infrastructure more efficient and less error-prone, while also enabling greater automation and scalability in your AWS environment.
+
+## What is Infradtructure as Code (IaC)?
+
+Infrastructure as Code (IaC) is a software engineering approach to manage and provision IT infrastructure and services through machine-readable configuration files, instead of manual intervention. IaC automates the process of infrastructure provisioning, configuration, and management, and enables teams to deploy, scale, and manage infrastructure and applications more efficiently and consistently. 
+
+With IaC, the infrastructure and configuration of a system are described in code, which can be version-controlled, tested, and automated. IaC tools such as Terraform, CloudFormation, or Ansible use code to define the desired state of the infrastructure and automate the process of creating and updating resources. 
+
+IaC provides several benefits, including:
+
+1. Consistency: Infrastructure can be deployed in a consistent manner every time, reducing human error and increasing reliability.
+2. Scalability: IaC allows teams to create and manage infrastructure at scale, automatically scaling up or down as needed.
+3. Agility: IaC enables teams to quickly spin up and tear down infrastructure resources to meet changing business needs.
+4. Reusability: Code can be reused and shared across teams and projects, reducing the amount of repetitive work.
+5. Auditability: IaC provides a centralized view of infrastructure changes, making it easier to track changes and maintain compliance.
+6. Collaboration: IaC tools enable teams to work together on infrastructure code, promoting collaboration and knowledge sharing.
+
+### Services/Tools that can help to achieve IaC?
+
+There are many tools and services that can help you achieve Infrastructure as Code (IaC). Some popular ones include:
+
+1. Terraform: Terraform is an open-source tool that allows you to define and provision infrastructure using a high-level configuration language. It supports a wide range of cloud providers and services, including AWS, Google Cloud, and Azure.
+
+2. AWS CloudFormation: AWS CloudFormation is a service provided by Amazon Web Services (AWS) that allows you to define and provision AWS infrastructure using templates written in JSON or YAML. It supports a wide range of AWS services, including EC2, RDS, S3, and many others.
+
+3. Azure Resource Manager: Azure Resource Manager is a service provided by Microsoft Azure that allows you to provision and manage resources using templates written in JSON or YAML. It supports a wide range of Azure services, including VMs, databases, and storage.
+
+4. Google Cloud Deployment Manager: Google Cloud Deployment Manager is a service provided by Google Cloud that allows you to define and deploy infrastructure using templates written in YAML or Python. It supports a wide range of Google Cloud services, including Compute Engine, Cloud Storage, and BigQuery.
+
+5. Ansible: Ansible is an open-source automation tool that allows you to define and provision infrastructure using playbooks written in YAML. It supports a wide range of operating systems and cloud providers, including AWS, Google Cloud, and Azure.
+
+6. Chef: Chef is an open-source configuration management tool that allows you to define and manage infrastructure using recipes written in Ruby. It supports a wide range of operating systems and cloud providers, including AWS, Google Cloud, and Azure.
+
+7. Puppet: Puppet is an open-source configuration management tool that allows you to define and manage infrastructure using manifests written in its own declarative language. It supports a wide range of operating systems and cloud providers, including AWS, Google Cloud, and Azure.
+
+These tools and services can help you achieve Infrastructure as Code by allowing you to define and manage your infrastructure using code, which makes it easier to provision and manage your resources, automate your deployments, and reduce the likelihood of errors.
+
+Overall, IaC provides a more efficient and reliable way to manage IT infrastructure and services, while reducing costs, increasing productivity, and improving security.
+
+
+### AWS CloudFormation - Security Best Practices - AWS
+- Compliance standard is what your business requires from a Infrastructure as Code (IaC) service and is available in the region you need to operate in.
+- Amazon Organizations SCP - to restrict actions like creation, deletion, modification of production Cloudformation Templates/Resources etc.
+- AWS CloudTrail is enabled and monitored to trigger alerts for malicious activities e.g changes to Production Environment etc.
+- AWS Audit Manager, IAM Access Analyzer etc.
+
+### AWS CloudFormation - Security Best Practices - Application
+- Access Control - Roles or IAM Users for making changes in Amazon Cloudformation Template stacks or StackSets especially one for production.
+- Security of the Cloudformation - Configuration access.
+- Security in the Cloudformation - Code Security Best Practices - SCA, SAST, Secret Scanner, DAST immplemented in the CI/CD Pipeline.
+- Security of the Cloudformation entry points e.g - private access points using AWS Private Link etc
+- Only use Trusted Source Control for sending changes to Cloudformation.
+- Develop process for continuously verifying if there is a change that may compromise the known state of a CI/CD pipeline.
 
 ### AWS CloudFormation Templates
 - [AWS CloudFormation Templates](https://aws.amazon.com/cloudformation/resources/templates/)
