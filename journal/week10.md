@@ -374,3 +374,32 @@ Here is an overview of what the different parts of the template do:
 The Parameters section defines input parameters used by the template. These include the NetworkingStack parameter, which defines the base layer of networking components (e.g. VPC, subnets), and the CertificateArn parameter, which defines the Amazon Certification Manager (ACM) certificate ARN. The Frontend and Backend parameters define the port, health check interval, health check path, health check port, health check protocol, health check timeout, healthy threshold count, and unhealthy threshold count for the Frontend and Backend Target Groups. 
 
 Overall, this CloudFormation template provides a robust network and cluster configuration to support Fargate containers and load balancing traffic between frontend and backend Target Groups.
+
+**CFN-Toml**
+
+Extracting environment variables and parsing parameter configurations using [`TOML`](https://www.w3schools.io/file/toml-introduction/) for cloudformation templates.
+
+```sh
+gem install cfn-toml
+```
+
+See the configs for [cluster](../aws/cfn/cluster/config.toml) and [network](../aws/cfn/networking/config.toml) using `toml`.
+
+
+**Deploying the Cluster layer**
+
+```sh
+./bin/cfn/cluster-deploy
+```
+
+Cloudfromation cluster stack change set
+![CFN Cluster layer](assets/week-10/cloudformation-20-cluster-layer-change-set.png)
+
+
+Resources created after executing change-set
+![CFN Cluster layer](assets/week-10/cloudformation-21-cluster-layer-resources-created.png)
+
+![CFN Cluster layer](assets/week-10/cloudformation-21-cluster-layer-resources-created-2.png)
+
+Exported outputs to be referenced by other cloudformation stacks when needed.
+![CFN Cluster layer](assets/week-10/cloudformation-22-cluster-layer-exported-outputs.png)
