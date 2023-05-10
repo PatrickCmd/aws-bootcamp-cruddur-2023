@@ -1,5 +1,212 @@
 # Week 11 — CloudFormation Part 2
 
+## AWS CloudFormation Database (RDS) Layer
+
+See the cloudformation implementation for the database layer [here](../aws/cfn/rds/template.yaml)
+
+This is an AWS CloudFormation template for creating a Postgres RDS Database in AWS. 
+
+The first part of the template is the description section where the purpose of the template is explained. It creates an RDS instance, database security group, and a database subnet group. 
+
+The `Parameters` section defines the input parameters that will be used when the stack is created. These parameters include the base layer of networking components like VPC and subnets, the Fargate cluster, backup retention period, DB instance class, DB instance identifier, DB name, deletion protection, engine version, master username, and master user password. 
+
+The `Resources` section defines the AWS resources that will be created. It includes a security group, subnet group, and an RDS instance. The `RDSPostgresSG` resource creates a security group that allows incoming traffic from the Fargate cluster on port 5432. The `DBSubnetGroup` resource creates a subnet group that includes the public subnets of the networking stack. Finally, the `Database` resource creates the actual RDS instance. It uses the parameters defined earlier to specify the database settings like the allocated storage, backup retention period, DB instance class, DB instance identifier, DB name, deletion protection, engine version, master username, and master user password. 
+
+Overall, this template can be used to create a Postgres RDS database with the specified settings in AWS.
+
+**Parameter's Section**
+
+```yaml
+Parameters:
+  NetworkingStack:
+    Type: String
+    Description: This is our base layer of networking components eg. VPC, Subnets
+    Default: CrudderNet
+  ClusterStack:
+    Type: String
+    Description: This is our FargateCluster
+    Default: CrudderCluster
+  BackupRetentionPeriod:
+    Type: Number
+    Default: 0
+  DBInstanceClass:
+    Type: String
+    Default: db.t4g.micro
+  DBInstanceIdentifier:
+    Type: String
+    Default: cruddur-instance
+  DBName:
+    Type: String
+    Default: cruddur
+  DeletionProtection:
+    Type: String
+    AllowedValues:
+      - true
+      - false
+    Default: true
+  EngineVersion:
+    Type: String
+    #  DB Proxy only supports very specific versions of Postgres
+    #  https://stackoverflow.com/questions/63084648/which-rds-db-instances-are-supported-for-db-proxy
+    Default: '15.2'
+  MasterUsername:
+    Type: String
+  MasterUserPassword:
+    Type: String
+    NoEcho: true
+```
+
+The `Parameters` section in the CloudFormation database template defines input parameters for the template. These parameters allow users to pass values into the CloudFormation stack at the time of stack creation or stack update. 
+
+In the template shown, there are several input parameters defined:
+- `NetworkingStack`: This parameter is of type string and represents the name of the networking stack that contains the VPC and subnets that this database instance should be deployed into. The default value is `CrudderNet`.
+- `ClusterStack`: This parameter is of type string and represents the name of the Fargate cluster stack that will access this database instance. The default value is `CrudderCluster`.
+- `BackupRetentionPeriod`: This parameter is of type number and represents the number of days that automated backups of the database should be retained. The default value is `0`, meaning no automated backups will be retained.
+- `DBInstanceClass`: This parameter is of type string and represents the size of the RDS instance to be created. The default value is `db.t4g.micro`.
+- `DBInstanceIdentifier`: This parameter is of type string and represents the unique identifier for the RDS instance. The default value is `cruddur-instance`.
+- `DBName`: This parameter is of type string and represents the name of the initial database to be created on the RDS instance. The default value is `cruddur`.
+- `DeletionProtection`: This parameter is of type string and represents whether or not the RDS instance should have deletion protection enabled. The default value is `true`.
+- `EngineVersion`: This parameter is of type string and represents the version of the PostgreSQL engine that will be used. The default value is `15.2`.
+- `MasterUsername`: This parameter is of type string and represents the username for the master user of the RDS instance.
+- `MasterUserPassword`: This parameter is of type string and represents the password for the master user of the RDS instance. The `NoEcho` attribute is set to `true` to prevent the password from being displayed in plain text in the CloudFormation console or logs. 
+
+Each parameter is given a default value, but these can be overridden when the stack is created or updated by the user.
+
+**RDSPostgresSG Resource**
+
+```yaml
+RDSPostgresSG:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${AWS::StackName}RDSSG"
+      GroupDescription: Public Facing SG for our Cruddur ALB
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${NetworkingStack}VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          SourceSecurityGroupId:
+            Fn::ImportValue:
+              !Sub ${ClusterStack}ServiceSecurityGroupId
+          FromPort: 5432
+          ToPort: 5432
+          Description: ALB HTTP
+```
+
+The `RDSPostgresSG` resource in the CloudFormation template is an AWS EC2 Security Group that will be created as part of the CloudFormation stack deployment. 
+
+The purpose of this security group is to allow inbound traffic from the ALB (Application Load Balancer) to access the Postgres RDS (Relational Database Service) instance that will be created in this template.
+
+Here are the key properties of the `RDSPostgresSG` resource:
+
+- `Type`: AWS::EC2::SecurityGroup
+- `GroupName`: A unique name for the security group, which is formed by concatenating the CloudFormation stack name with the string "RDSSG".
+- `GroupDescription`: A description for the security group.
+- `VpcId`: The ID of the VPC (Virtual Private Cloud) where the security group will be created.
+- `SecurityGroupIngress`: A list of ingress rules that control inbound traffic to the security group. In this case, there is only one rule, which allows inbound traffic from the ALB security group on port 5432 (the default port for Postgres). 
+
+Note that the ALB security group is referenced using the `Fn::ImportValue` function to import the ID of the security group. This is because the ALB security group is created in a separate CloudFormation stack (which is assumed to have been deployed prior to this stack) and its ID is exported using the `Export` attribute. 
+
+By allowing inbound traffic only from the ALB security group, this security group follows the principle of least privilege, which helps to minimize the attack surface of the RDS instance.
+
+
+**DBSubnetGroup Resource**
+
+```yaml
+DBSubnetGroup:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbsubnetgroup.html
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub "${AWS::StackName}DBSubnetGroup"
+      DBSubnetGroupDescription: !Sub "${AWS::StackName}DBSubnetGroup"
+      SubnetIds: { 'Fn::Split' : [ ','  , { "Fn::ImportValue": { "Fn::Sub": "${NetworkingStack}PublicSubnetIds" }}] }
+```
+
+The `DBSubnetGroup` resource in the CloudFormation template is used to create a database subnet group for the Amazon RDS DB instance. A DB subnet group is a collection of subnets that you can choose to use when you create a DB instance in a VPC. 
+
+The `DBSubnetGroup` resource has the following properties:
+
+- `DBSubnetGroupName`: A name for the DB subnet group. It must be unique within the account and region. The name should be descriptive of the purpose of the subnet group.
+- `DBSubnetGroupDescription`: A description for the DB subnet group.
+- `SubnetIds`: A comma-separated list of subnet IDs that are used to create the DB subnet group. These subnets should be in different Availability Zones.
+
+In this CloudFormation template, the `DBSubnetGroup` resource is defined with the properties to use the subnets created in the Networking stack. Specifically, the subnet IDs are retrieved from the `NetworkingStack` Parameter and the list of subnet IDs is created using the `Fn::Split` function and the `ImportValue` function to get the subnet IDs from the Networking stack's output.
+
+
+**Database Resource**
+
+```yaml
+Database:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html
+    Type: AWS::RDS::DBInstance
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-deletionpolicy.html
+    DeletionPolicy: 'Snapshot'
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatereplacepolicy.html
+    UpdateReplacePolicy: 'Snapshot'
+    Properties:
+      AllocatedStorage: '20'
+      AllowMajorVersionUpgrade: true
+      AutoMinorVersionUpgrade: true
+      BackupRetentionPeriod: !Ref  BackupRetentionPeriod
+      DBInstanceClass: !Ref DBInstanceClass
+      DBInstanceIdentifier: !Ref DBInstanceIdentifier
+      DBName: !Ref DBName
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DeletionProtection: !Ref DeletionProtection
+      EnablePerformanceInsights: true
+      Engine: postgres
+      EngineVersion: !Ref EngineVersion
+
+      MasterUsername:  !Ref MasterUsername
+      # Constraints: Must contain from 8 to 128 characters.
+      MasterUserPassword: !Ref MasterUserPassword
+      PubliclyAccessible: true
+      VPCSecurityGroups:
+        - !GetAtt RDSPostgresSG.GroupId
+```
+
+The `Database` resource in the CloudFormation template represents the RDS (Relational Database Service) instance that will be created. It defines the instance's properties, such as the allocated storage, DB instance class, DB name, DB subnet group, engine, engine version, master username and password, and the publicly accessible attribute.
+
+Here's a breakdown of the properties:
+
+- `AllocatedStorage`: Specifies the storage size in GB for the database. The minimum storage size is 20 GB.
+- `AllowMajorVersionUpgrade`: Specifies whether major version upgrades are allowed for the database.
+- `AutoMinorVersionUpgrade`: Specifies whether minor version upgrades are applied automatically to the database during the maintenance window.
+- `BackupRetentionPeriod`: Specifies the number of days to retain automated backups. If set to 0, backups are disabled.
+- `DBInstanceClass`: Specifies the instance class for the database.
+- `DBInstanceIdentifier`: Specifies a unique identifier for the database instance.
+- `DBName`: Specifies the name of the database to create on the instance.
+- `DBSubnetGroupName`: Specifies the DB subnet group to associate with the database instance.
+- `DeletionProtection`: Specifies whether deletion protection is enabled for the database. If enabled, the database cannot be deleted.
+- `EnablePerformanceInsights`: Specifies whether performance insights are enabled for the database.
+- `Engine`: Specifies the name of the database engine.
+- `EngineVersion`: Specifies the version of the database engine.
+- `MasterUsername`: Specifies the name of the master user for the database.
+- `MasterUserPassword`: Specifies the password for the master user. The value is passed as a parameter with `NoEcho` attribute set to `true`.
+- `PubliclyAccessible`: Specifies whether the database instance is publicly accessible or not.
+- `VPCSecurityGroups`: Specifies the list of security groups to associate with the database instance.
+
+The `Database` resource also includes two important attributes: `DeletionPolicy` and `UpdateReplacePolicy`. The `DeletionPolicy` specifies what happens to the resource when the stack is deleted. In this case, it's set to 'Snapshot', which means the instance is deleted, but a final snapshot of the database is retained. The `UpdateReplacePolicy` specifies what happens to the resource when its properties are changed. In this case, it's set to 'Snapshot', which means a new instance is created and data from the old instance is copied to the new instance.
+
+
+**Deploying the Database layer**
+
+```sh
+./bin/cfn/db-deploy
+```
+
+Cloudfromation Database stack change set
+![CFN Service layer](assets/week-10/cloudformation-25-db-layer-change-set.png)
+
+
+Resources created after executing change-set
+![CFN Service layer](assets/week-10/cloudformation-26-db-layer-resources-created.png)
+
+Database instance created after executing change-set
+![CFN Service layer](assets/week-10/cloudformation-27-db-instance-created.png)
+
+
 ## AWS CloudFormation Backend-Flask Service Layer
 
 See the cloudformation implementation for the service template [here](../aws/cfn/service/template.yaml)
