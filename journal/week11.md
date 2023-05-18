@@ -1,5 +1,9 @@
 # Week 11 — CloudFormation Part 2
 
+![cruddur-network-cluster-rds-service-layer](assets/week-10/Cruddur-Network-Cluster-RDS-Service-Layer.png)
+
+See link [here](https://lucid.app/lucidchart/32e756b5-d4e5-4e4a-baa8-788640c65804/edit?viewport_loc=465%2C-1005%2C2219%2C1040%2C0_0&invitationId=inv_42be5a05-2325-4126-aca4-4d54675d1896)
+
 ## AWS CloudFormation Database (RDS) Layer
 
 See the cloudformation implementation for the database layer [here](../aws/cfn/rds/template.yaml)
