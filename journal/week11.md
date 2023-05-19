@@ -676,3 +676,262 @@ Cloudfromation Service stack change set
 Resources created after executing change-set
 ![CFN Service layer](assets/week-10/cloudformation-24-service-layer-resources-created.png)
 
+
+## AWS Serverless Application Model (AWS SAM)
+
+[**What is the AWS Serverless Application Model (AWS SAM)?**](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
+
+AWS SAM (Serverless Application Model) is an open-source framework provided by Amazon Web Services (AWS) that simplifies the development, deployment, and management of serverless applications on AWS. It extends the capabilities of AWS CloudFormation, which is AWS's infrastructure-as-code service, to enable developers to define serverless applications using a simplified syntax.
+
+With AWS SAM, you can define your serverless application's resources, such as AWS Lambda functions, Amazon API Gateway APIs, Amazon DynamoDB tables, and other AWS services, in a template file written in YAML or JSON. The template describes the application's architecture and the resources required to run it.
+
+AWS SAM provides a set of additional features and abstractions that make it easier to work with serverless applications. Some key features of AWS SAM include:
+
+1. Lambda Function Templates: AWS SAM provides a simplified syntax for defining Lambda functions, including event sources, environment variables, and resource requirements.
+
+2. Local Development and Testing: You can use AWS SAM CLI (Command Line Interface) to locally develop and test your serverless applications before deploying them to AWS.
+
+3. Deployment and Packaging: AWS SAM CLI helps package and deploy your serverless applications to AWS. It automatically manages the creation and updating of CloudFormation stacks based on your SAM templates.
+
+4. Resource Policies and Permissions: AWS SAM simplifies the configuration of resource policies and permissions for your serverless application. You can define fine-grained access control using AWS Identity and Access Management (IAM) policies.
+
+5. Application Lifecycle Management: AWS SAM provides capabilities for managing the lifecycle of your serverless applications, including easy updating and deletion of resources.
+
+By using AWS SAM, developers can accelerate their serverless application development and benefit from the scalability, cost-effectiveness, and operational ease of AWS Lambda and other AWS serverless services.
+
+
+### SAM CFN For DynanoDB and DynamoDB Streams Lambda
+
+**template.yaml**
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: | 
+  - DynamoDB Table
+  - DynamoDB Stream
+Parameters:
+  PythonRuntime:
+    Type: String
+    Default: python3.9
+  MemorySize:
+    Type: String
+    Default:  128
+  Timeout:
+    Type: Number
+    Default: 3
+  DeletionProtectionEnabled:
+    Type: String
+    Default: false
+Resources:
+  DynamoDBTable:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: message_group_uuid
+          AttributeType: S
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      TableClass: STANDARD 
+      KeySchema: 
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      BillingMode: PROVISIONED
+      DeletionProtectionEnabled: !Ref DeletionProtectionEnabled
+      GlobalSecondaryIndexes:
+        - IndexName: message-group-sk-index
+          KeySchema:
+            - AttributeName: message_group_uuid
+              KeyType: HASH
+            - AttributeName: sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+  ProcessDynamoDBStream:
+    # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cruddur-messaging-stream
+      PackageType: Zip
+      Handler: lambda_handler
+      Runtime: !Ref PythonRuntime
+      Role: !GetAtt ExecutionRole.Arn
+      MemorySize: !Ref MemorySize
+      Timeout: !Ref Timeout
+      Events:
+        Stream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt DynamoDBTable.StreamArn
+            # TODO - Does our Lambda handle more than record?
+            BatchSize: 1
+            # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-dynamodb.html#sam-function-dynamodb-startingposition
+            # TODO - This this the right value?
+            StartingPosition: LATEST
+  LambdaLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: "/aws/lambda/cruddur-messaging-stream00"
+      RetentionInDays: 14
+  LambdaLogStream:
+    Type: "AWS::Logs::LogStream"
+    Properties:
+      LogGroupName: !Ref LambdaLogGroup
+      LogStreamName: "LambdaExecution"
+  ExecutionRole:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CruddurDdbStreamExecRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: "LambdaExecutionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "logs:CreateLogGroup"
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LambdaLogGroup}:*"
+              - Effect: "Allow"
+                Action:
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:DescribeNetworkInterfaces"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "dynamodb:DescribeStream"
+                  - "dynamodb:GetRecords"
+                  - "dynamodb:GetShardIterator"
+                  - "dynamodb:ListStreams"
+                Resource: "*"
+```
+
+The provided SAM (Serverless Application Model) template is used to define and deploy AWS resources for a serverless application that involves a DynamoDB table, a Lambda function, and associated logging configurations. Let's break down the template into its different sections:
+
+1. `AWSTemplateFormatVersion` and `Transform`: These fields specify the version of the template and the SAM transform used.
+
+2. `Description`: This field provides a description of the resources defined in the template.
+
+3. `Parameters`: This section defines input parameters that can be customized during stack creation. In this template, parameters like `PythonRuntime`, `MemorySize`, `Timeout`, and `DeletionProtectionEnabled` are defined with their default values.
+
+4. `Resources`: This section defines the AWS resources that make up the serverless application.
+
+   - `DynamoDBTable`: This resource defines an AWS DynamoDB table. It specifies the table's attribute definitions, key schema, provisioned throughput, billing mode, deletion protection, global secondary indexes, and stream specification.
+
+   - `ProcessDynamoDBStream`: This resource defines an AWS Lambda function (`AWS::Serverless::Function`) responsible for processing the DynamoDB stream. It specifies the function's code location, runtime, execution role, memory size, timeout, and event source mapping to the DynamoDB stream.
+
+   - `LambdaLogGroup`: This resource creates an AWS CloudWatch Logs log group to store logs generated by the Lambda function.
+
+   - `LambdaLogStream`: This resource creates an AWS CloudWatch Logs log stream within the previously created log group.
+
+   - `ExecutionRole`: This resource creates an AWS Identity and Access Management (IAM) role for the Lambda function. It defines the role's name, assume role policy, and permissions necessary for the Lambda function to execute, access logs, and interact with DynamoDB.
+
+The template combines AWS CloudFormation and AWS SAM syntax. It leverages the capabilities of SAM to simplify the definition of serverless resources, such as Lambda functions, DynamoDB tables, and event source mappings, while still relying on CloudFormation for provisioning and managing the resources.
+
+Overall, this SAM template creates a DynamoDB table, sets up a Lambda function to process the table's stream, creates logging resources for the Lambda function, and configures the necessary permissions for execution and resource access.
+
+### More detailed explanation of the resources.
+
+Certainly! Let's go through each of the resources defined in the SAM template and provide an explanation for each:
+
+1. **DynamoDBTable**:
+   - Type: AWS::DynamoDB::Table
+   - Description: This resource creates an AWS DynamoDB table.
+   - Properties:
+     - AttributeDefinitions: Defines the attribute names and types for the table.
+     - TableClass: Specifies the table class as STANDARD.
+     - KeySchema: Defines the primary key schema for the table.
+     - ProvisionedThroughput: Sets the provisioned read and write capacity units for the table.
+     - BillingMode: Sets the billing mode to PROVISIONED.
+     - DeletionProtectionEnabled: Enables or disables deletion protection based on the `DeletionProtectionEnabled` parameter value.
+     - GlobalSecondaryIndexes: Creates a global secondary index for the table.
+     - StreamSpecification: Specifies the stream view type for the table.
+
+2. **ProcessDynamoDBStream**:
+   - Type: AWS::Serverless::Function
+   - Description: This resource creates an AWS Lambda function for processing a DynamoDB stream.
+   - Properties:
+     - CodeUri: Specifies the location of the Lambda function code.
+     - PackageType: Sets the package type as Zip.
+     - Handler: Defines the entry point for the Lambda function.
+     - Runtime: Sets the runtime for the Lambda function based on the `PythonRuntime` parameter value.
+     - Role: Specifies the IAM role used by the Lambda function.
+     - MemorySize: Sets the memory size for the Lambda function based on the `MemorySize` parameter value.
+     - Timeout: Sets the timeout for the Lambda function based on the `Timeout` parameter value.
+     - Events: Configures the event source mapping for the Lambda function, specifying the DynamoDB stream as the event source.
+
+3. **LambdaLogGroup**:
+   - Type: "AWS::Logs::LogGroup"
+   - Description: This resource creates an AWS CloudWatch Logs log group for the Lambda function.
+   - Properties:
+     - LogGroupName: Specifies the name of the log group.
+     - RetentionInDays: Sets the retention period for the log group to 14 days.
+
+4. **LambdaLogStream**:
+   - Type: "AWS::Logs::LogStream"
+   - Description: This resource creates an AWS CloudWatch Logs log stream within the previously created log group.
+   - Properties:
+     - LogGroupName: References the log group created by `LambdaLogGroup`.
+     - LogStreamName: Specifies the name of the log stream.
+
+5. **ExecutionRole**:
+   - Type: AWS::IAM::Role
+   - Description: This resource creates an IAM role for the Lambda function's execution.
+   - Properties:
+     - RoleName: Specifies the name of the IAM role.
+     - AssumeRolePolicyDocument: Defines the trust relationship policy allowing the Lambda service to assume this role.
+     - Policies: Configures the IAM policies attached to the role, granting permissions for logging, EC2 network interface operations, Lambda function invocation, and DynamoDB stream operations.
+
+These resources collectively define the DynamoDB table, the Lambda function for processing the table's stream, the CloudWatch Logs resources for logging, and the IAM role for the Lambda function's execution.
+
+### SAM Installation
+
+You can follow the instructions [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+
+**Github Resources**
+- [AWS SAM transform](https://github.com/aws/serverless-application-model)
+- [AWS SAM CLI](https://github.com/aws/aws-sam-cli)
+
+
+#### Gitpod stepup
+
+```yaml
+tasks:
+  - name: aws-sam
+    init: |
+      cd /workspace
+      wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+      unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+      sudo ./sam-installation/install
+      cd $THEIA_WORKSPACE_ROOT
+```
+

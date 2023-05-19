@@ -6,3 +6,6 @@ frontend-react-js/build/*
 session-manager-plugin.deb
 node_modules
 .vscode/
+.aws-sam
+build.toml
+tmp/*
