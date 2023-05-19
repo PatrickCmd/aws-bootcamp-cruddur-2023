@@ -935,3 +935,22 @@ tasks:
       cd $THEIA_WORKSPACE_ROOT
 ```
 
+**build template**
+
+```sh
+./aws/cfn/ddb/build
+```
+
+**package**
+
+```sh
+./aws/cfn/ddb/package
+```
+
+**deploy**
+
+```sh
+./aws/cfn/ddb/deploy
+```
+
+![samcli deploy](assets/week-10/dynamodb-samcli-deploy.png)
