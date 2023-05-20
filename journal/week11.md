@@ -702,6 +702,10 @@ By using AWS SAM, developers can accelerate their serverless application develop
 
 ### SAM CFN For DynanoDB and DynamoDB Streams Lambda
 
+![DynamoDB](assets/week-10/Cruddur-Network-Cluster-RDS-Service-DynamoDB.png)
+
+See Lucid diagram [here](https://lucid.app/lucidchart/b815e3ce-b761-4b6e-ae2a-952c6f1f239a/edit?viewport_loc=2991%2C-1155%2C2219%2C1040%2C0_0&invitationId=inv_abbb8100-9818-4c4c-98d3-0785e0051d2a)
+
 **template.yaml**
 
 ```yaml
