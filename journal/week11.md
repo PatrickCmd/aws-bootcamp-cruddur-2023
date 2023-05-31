@@ -1000,6 +1000,10 @@ By implementing CFN CI/CD, developers can automate the deployment and management
 
 ### CFN CI/CD Template
 
+![CFN CI/CD](assets/week-10/Cruddur-Network-Cluster-RDS-Service-DynamoDB-CICD.png)
+
+Lucidchart link [here](https://lucid.app/lucidchart/ccd27137-c6b2-4dcc-856b-00bdb6a86bb7/edit?viewport_loc=1147%2C-745%2C2219%2C1040%2C0_0&invitationId=inv_e02bab1e-d405-4921-aa59-b591af1bfd62)
+
 See the template [here](../aws/cfn/cicd/template.yaml)
 
 This CloudFormation (CFN) template sets up a CI/CD pipeline for deploying an application using **AWS CodeStar Connection**, **AWS CodePipeline**, **AWS CodeBuild**, and **AWS Elastic Container Service (ECS)**. Let's break down the different components and resources defined in the template:
