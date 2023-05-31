@@ -958,3 +958,73 @@ tasks:
 ```
 
 ![samcli deploy](assets/week-10/dynamodb-samcli-deploy.png)
+
+
+## CI/CD (Continuous Integration and Continuous Delivery/Deployment)
+
+**CI/CD** stands for Continuous Integration and Continuous Delivery/Deployment. It is a set of practices and tools used in software development to automate the process of building, testing, and deploying applications.
+
+In the context of AWS, **CI/CD** in AWS refers to the implementation of these practices and tools within the Amazon Web Services (AWS) ecosystem. AWS provides various services and tools that enable developers to establish a robust CI/CD pipeline for their applications.
+
+Here's a high-level overview of the CI/CD process in AWS:
+
+1. Continuous Integration (CI): Developers frequently integrate their code changes into a shared repository, which triggers an automated build process. AWS provides services like AWS CodeCommit, a fully managed source control service, and AWS CodeBuild, a fully managed build service, to facilitate this step. CodeCommit allows teams to store and version their code, while CodeBuild compiles the code and generates build artifacts.
+
+2. Continuous Delivery (CD): After successful builds, the next step is to automate the delivery of these build artifacts to various environments, such as development, staging, and production. AWS provides services like AWS CodeDeploy and AWS Elastic Beanstalk for this purpose. CodeDeploy allows you to deploy applications to EC2 instances, on-premises servers, or services like AWS Fargate and Lambda. Elastic Beanstalk is a platform-as-a-service (PaaS) offering that simplifies the deployment and management of applications on AWS.
+
+3. Continuous Deployment: In some cases, organizations may choose to fully automate the deployment process to production, known as continuous deployment. This means that successful builds are automatically deployed to the production environment without manual intervention. AWS services like AWS CodePipeline and AWS Elastic Beanstalk can help enable continuous deployment scenarios.
+
+4. Testing and Quality Assurance: Throughout the CI/CD pipeline, it's crucial to include automated testing to ensure the quality of the software. AWS provides services like AWS CodePipeline and AWS CodeBuild, which can be integrated with popular testing frameworks, such as Selenium, JUnit, or other custom testing scripts.
+
+By implementing CI/CD in AWS, developers can reduce manual effort, improve software quality, increase deployment frequency, and enhance the overall efficiency of their application delivery processes.
+
+
+## CFN CI/CD
+
+**CFN CI/CD** refers to Continuous Integration and Continuous Deployment/Continuous Delivery in the context of AWS CloudFormation (CFN). AWS CloudFormation is a service that allows you to define and provision infrastructure resources and applications in a declarative manner using templates.
+
+CFN CI/CD involves automating the process of deploying and updating AWS CloudFormation stacks as part of a continuous integration and deployment pipeline. This enables developers to automate the deployment of infrastructure changes, manage versioning, and ensure consistency and repeatability in the deployment process.
+
+Here's a high-level overview of CFN CI/CD process:
+
+1. Continuous Integration (CI): Developers frequently integrate changes to their CloudFormation templates into a version control system, such as Git. This triggers an automated CI process that includes steps like template validation, linting, and unit testing. Tools like AWS CloudFormation Linter or third-party tools can be used to perform these checks. The CI process ensures that the CloudFormation templates are syntactically correct, follow best practices, and meet the required standards.
+
+2. Continuous Deployment (CD): Once the CI process is successful, the next step is to automate the deployment of CloudFormation stacks. This involves using tools like AWS CloudFormation CLI, AWS CloudFormation APIs, or AWS SDKs to interact with AWS CloudFormation service. Deployment scripts or infrastructure-as-code (IaC) frameworks like AWS CDK (Cloud Development Kit) or AWS SAM (Serverless Application Model) can be utilized to simplify the deployment process.
+
+3. Pipeline Orchestration: To establish a CI/CD pipeline for CFN, developers can leverage AWS services like AWS CodePipeline or other third-party tools. These tools allow you to define and configure the stages of your pipeline, such as source code integration, build, testing, and deployment. Each stage can include actions that interact with CFN, such as template validation, stack creation, stack update, or stack deletion.
+
+4. Testing and Validation: It's important to include automated testing and validation as part of the CI/CD process for CFN. This can involve integration tests, infrastructure tests, or any custom testing scripts to ensure the correctness and stability of the deployed infrastructure.
+
+By implementing CFN CI/CD, developers can automate the deployment and management of their infrastructure as code, streamline the delivery process, ensure consistency across environments, and reduce manual effort and potential errors.
+
+
+### CFN CI/CD Template
+
+See the template [here](../aws/cfn/cicd/template.yaml)
+
+This CloudFormation (CFN) template sets up a CI/CD pipeline for deploying an application using **AWS CodeStar Connection**, **AWS CodePipeline**, **AWS CodeBuild**, and **AWS Elastic Container Service (ECS)**. Let's break down the different components and resources defined in the template:
+
+- The `AWSTemplateFormatVersion` specifies the version of the CloudFormation template syntax.
+- The `Description` provides a brief explanation of the purpose of the template and the services it uses.
+- The `Parameters` section defines input parameters that can be customized when deploying the stack. It includes parameters like `GitHubBranch`, `GithubRepo`, `ClusterStack`, `ServiceStack`, and `ArtifactBucketName`.
+- The `Resources` section contains the main resources defined in the template:
+  - `CodeBuildBakeImageStack`: This resource creates a nested CloudFormation stack by referencing an external `codebuild.yaml` template. It deploys a CodeBuild project responsible for building container images.
+  - `CodeStarConnection`: This resource sets up an **AWS CodeStar** Connection, which establishes a connection to a GitHub repository. The `ProviderType` is set to GitHub.
+  - `Pipeline`: This resource defines an **AWS CodePipeline**, which orchestrates the CI/CD process. It has stages named "Source," "Build," and "Deploy." Each stage has actions that perform specific tasks like pulling source code, building the application, and deploying to ECS.
+  - `CodePipelineRole`: This resource creates an IAM role for the CodePipeline with policies that grant permissions for ECS, CodeStar Connections, CodePipeline, S3, CloudFormation, and IAM.
+
+The template also defines multiple policies (`CodeStarPolicy`, `CodePipelinePolicy`, `CodePipelineBuildPolicy`, and `EcsDeployPolicy`) associated with the `CodePipelineRole`, which specify the permissions required for the pipeline to interact with the different AWS services involved in the CI/CD process.
+
+Overall, this CloudFormation template sets up a CI/CD pipeline that integrates with a GitHub repository, performs build operations using CodeBuild, and deploys the application to ECS using CodePipeline. The template creates the necessary resources and establishes the required permissions for the pipeline to function.
+
+**Deploy CI/CD CFN Template**
+
+Run the script below to deploy the `CFN CI/CD template`
+
+```sh
+./bin/cfn/cicd-deploy
+```
+
+CFN CI/CD Changesets
+
+![CFN CI/CD](assets/week-10/cfn-cicd-layer-changesets.png)
