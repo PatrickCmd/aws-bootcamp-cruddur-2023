@@ -676,3 +676,394 @@ Cloudfromation Service stack change set
 Resources created after executing change-set
 ![CFN Service layer](assets/week-10/cloudformation-24-service-layer-resources-created.png)
 
+
+## AWS Serverless Application Model (AWS SAM)
+
+[**What is the AWS Serverless Application Model (AWS SAM)?**](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
+
+AWS SAM (Serverless Application Model) is an open-source framework provided by Amazon Web Services (AWS) that simplifies the development, deployment, and management of serverless applications on AWS. It extends the capabilities of AWS CloudFormation, which is AWS's infrastructure-as-code service, to enable developers to define serverless applications using a simplified syntax.
+
+With AWS SAM, you can define your serverless application's resources, such as AWS Lambda functions, Amazon API Gateway APIs, Amazon DynamoDB tables, and other AWS services, in a template file written in YAML or JSON. The template describes the application's architecture and the resources required to run it.
+
+AWS SAM provides a set of additional features and abstractions that make it easier to work with serverless applications. Some key features of AWS SAM include:
+
+1. Lambda Function Templates: AWS SAM provides a simplified syntax for defining Lambda functions, including event sources, environment variables, and resource requirements.
+
+2. Local Development and Testing: You can use AWS SAM CLI (Command Line Interface) to locally develop and test your serverless applications before deploying them to AWS.
+
+3. Deployment and Packaging: AWS SAM CLI helps package and deploy your serverless applications to AWS. It automatically manages the creation and updating of CloudFormation stacks based on your SAM templates.
+
+4. Resource Policies and Permissions: AWS SAM simplifies the configuration of resource policies and permissions for your serverless application. You can define fine-grained access control using AWS Identity and Access Management (IAM) policies.
+
+5. Application Lifecycle Management: AWS SAM provides capabilities for managing the lifecycle of your serverless applications, including easy updating and deletion of resources.
+
+By using AWS SAM, developers can accelerate their serverless application development and benefit from the scalability, cost-effectiveness, and operational ease of AWS Lambda and other AWS serverless services.
+
+
+### SAM CFN For DynanoDB and DynamoDB Streams Lambda
+
+![DynamoDB](assets/week-10/Cruddur-Network-Cluster-RDS-Service-DynamoDB.png)
+
+See Lucid diagram [here](https://lucid.app/lucidchart/b815e3ce-b761-4b6e-ae2a-952c6f1f239a/edit?viewport_loc=2991%2C-1155%2C2219%2C1040%2C0_0&invitationId=inv_abbb8100-9818-4c4c-98d3-0785e0051d2a)
+
+**template.yaml**
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: | 
+  - DynamoDB Table
+  - DynamoDB Stream
+Parameters:
+  PythonRuntime:
+    Type: String
+    Default: python3.9
+  MemorySize:
+    Type: String
+    Default:  128
+  Timeout:
+    Type: Number
+    Default: 3
+  DeletionProtectionEnabled:
+    Type: String
+    Default: false
+Resources:
+  DynamoDBTable:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: message_group_uuid
+          AttributeType: S
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      TableClass: STANDARD 
+      KeySchema: 
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      BillingMode: PROVISIONED
+      DeletionProtectionEnabled: !Ref DeletionProtectionEnabled
+      GlobalSecondaryIndexes:
+        - IndexName: message-group-sk-index
+          KeySchema:
+            - AttributeName: message_group_uuid
+              KeyType: HASH
+            - AttributeName: sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+  ProcessDynamoDBStream:
+    # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cruddur-messaging-stream
+      PackageType: Zip
+      Handler: lambda_handler
+      Runtime: !Ref PythonRuntime
+      Role: !GetAtt ExecutionRole.Arn
+      MemorySize: !Ref MemorySize
+      Timeout: !Ref Timeout
+      Events:
+        Stream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt DynamoDBTable.StreamArn
+            # TODO - Does our Lambda handle more than record?
+            BatchSize: 1
+            # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-dynamodb.html#sam-function-dynamodb-startingposition
+            # TODO - This this the right value?
+            StartingPosition: LATEST
+  LambdaLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: "/aws/lambda/cruddur-messaging-stream00"
+      RetentionInDays: 14
+  LambdaLogStream:
+    Type: "AWS::Logs::LogStream"
+    Properties:
+      LogGroupName: !Ref LambdaLogGroup
+      LogStreamName: "LambdaExecution"
+  ExecutionRole:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CruddurDdbStreamExecRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: "LambdaExecutionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "logs:CreateLogGroup"
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LambdaLogGroup}:*"
+              - Effect: "Allow"
+                Action:
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:DescribeNetworkInterfaces"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "dynamodb:DescribeStream"
+                  - "dynamodb:GetRecords"
+                  - "dynamodb:GetShardIterator"
+                  - "dynamodb:ListStreams"
+                Resource: "*"
+```
+
+The provided SAM (Serverless Application Model) template is used to define and deploy AWS resources for a serverless application that involves a DynamoDB table, a Lambda function, and associated logging configurations. Let's break down the template into its different sections:
+
+1. `AWSTemplateFormatVersion` and `Transform`: These fields specify the version of the template and the SAM transform used.
+
+2. `Description`: This field provides a description of the resources defined in the template.
+
+3. `Parameters`: This section defines input parameters that can be customized during stack creation. In this template, parameters like `PythonRuntime`, `MemorySize`, `Timeout`, and `DeletionProtectionEnabled` are defined with their default values.
+
+4. `Resources`: This section defines the AWS resources that make up the serverless application.
+
+   - `DynamoDBTable`: This resource defines an AWS DynamoDB table. It specifies the table's attribute definitions, key schema, provisioned throughput, billing mode, deletion protection, global secondary indexes, and stream specification.
+
+   - `ProcessDynamoDBStream`: This resource defines an AWS Lambda function (`AWS::Serverless::Function`) responsible for processing the DynamoDB stream. It specifies the function's code location, runtime, execution role, memory size, timeout, and event source mapping to the DynamoDB stream.
+
+   - `LambdaLogGroup`: This resource creates an AWS CloudWatch Logs log group to store logs generated by the Lambda function.
+
+   - `LambdaLogStream`: This resource creates an AWS CloudWatch Logs log stream within the previously created log group.
+
+   - `ExecutionRole`: This resource creates an AWS Identity and Access Management (IAM) role for the Lambda function. It defines the role's name, assume role policy, and permissions necessary for the Lambda function to execute, access logs, and interact with DynamoDB.
+
+The template combines AWS CloudFormation and AWS SAM syntax. It leverages the capabilities of SAM to simplify the definition of serverless resources, such as Lambda functions, DynamoDB tables, and event source mappings, while still relying on CloudFormation for provisioning and managing the resources.
+
+Overall, this SAM template creates a DynamoDB table, sets up a Lambda function to process the table's stream, creates logging resources for the Lambda function, and configures the necessary permissions for execution and resource access.
+
+### More detailed explanation of the resources.
+
+Certainly! Let's go through each of the resources defined in the SAM template and provide an explanation for each:
+
+1. **DynamoDBTable**:
+   - Type: AWS::DynamoDB::Table
+   - Description: This resource creates an AWS DynamoDB table.
+   - Properties:
+     - AttributeDefinitions: Defines the attribute names and types for the table.
+     - TableClass: Specifies the table class as STANDARD.
+     - KeySchema: Defines the primary key schema for the table.
+     - ProvisionedThroughput: Sets the provisioned read and write capacity units for the table.
+     - BillingMode: Sets the billing mode to PROVISIONED.
+     - DeletionProtectionEnabled: Enables or disables deletion protection based on the `DeletionProtectionEnabled` parameter value.
+     - GlobalSecondaryIndexes: Creates a global secondary index for the table.
+     - StreamSpecification: Specifies the stream view type for the table.
+
+2. **ProcessDynamoDBStream**:
+   - Type: AWS::Serverless::Function
+   - Description: This resource creates an AWS Lambda function for processing a DynamoDB stream.
+   - Properties:
+     - CodeUri: Specifies the location of the Lambda function code.
+     - PackageType: Sets the package type as Zip.
+     - Handler: Defines the entry point for the Lambda function.
+     - Runtime: Sets the runtime for the Lambda function based on the `PythonRuntime` parameter value.
+     - Role: Specifies the IAM role used by the Lambda function.
+     - MemorySize: Sets the memory size for the Lambda function based on the `MemorySize` parameter value.
+     - Timeout: Sets the timeout for the Lambda function based on the `Timeout` parameter value.
+     - Events: Configures the event source mapping for the Lambda function, specifying the DynamoDB stream as the event source.
+
+3. **LambdaLogGroup**:
+   - Type: "AWS::Logs::LogGroup"
+   - Description: This resource creates an AWS CloudWatch Logs log group for the Lambda function.
+   - Properties:
+     - LogGroupName: Specifies the name of the log group.
+     - RetentionInDays: Sets the retention period for the log group to 14 days.
+
+4. **LambdaLogStream**:
+   - Type: "AWS::Logs::LogStream"
+   - Description: This resource creates an AWS CloudWatch Logs log stream within the previously created log group.
+   - Properties:
+     - LogGroupName: References the log group created by `LambdaLogGroup`.
+     - LogStreamName: Specifies the name of the log stream.
+
+5. **ExecutionRole**:
+   - Type: AWS::IAM::Role
+   - Description: This resource creates an IAM role for the Lambda function's execution.
+   - Properties:
+     - RoleName: Specifies the name of the IAM role.
+     - AssumeRolePolicyDocument: Defines the trust relationship policy allowing the Lambda service to assume this role.
+     - Policies: Configures the IAM policies attached to the role, granting permissions for logging, EC2 network interface operations, Lambda function invocation, and DynamoDB stream operations.
+
+These resources collectively define the DynamoDB table, the Lambda function for processing the table's stream, the CloudWatch Logs resources for logging, and the IAM role for the Lambda function's execution.
+
+### SAM Installation
+
+You can follow the instructions [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+
+**Github Resources**
+- [AWS SAM transform](https://github.com/aws/serverless-application-model)
+- [AWS SAM CLI](https://github.com/aws/aws-sam-cli)
+
+
+#### Gitpod stepup
+
+```yaml
+tasks:
+  - name: aws-sam
+    init: |
+      cd /workspace
+      wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+      unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+      sudo ./sam-installation/install
+      cd $THEIA_WORKSPACE_ROOT
+```
+
+**build template**
+
+```sh
+./aws/cfn/ddb/build
+```
+
+**package**
+
+```sh
+./aws/cfn/ddb/package
+```
+
+**deploy**
+
+```sh
+./aws/cfn/ddb/deploy
+```
+
+![samcli deploy](assets/week-10/dynamodb-samcli-deploy.png)
+
+
+## CI/CD (Continuous Integration and Continuous Delivery/Deployment)
+
+**CI/CD** stands for Continuous Integration and Continuous Delivery/Deployment. It is a set of practices and tools used in software development to automate the process of building, testing, and deploying applications.
+
+In the context of AWS, **CI/CD** in AWS refers to the implementation of these practices and tools within the Amazon Web Services (AWS) ecosystem. AWS provides various services and tools that enable developers to establish a robust CI/CD pipeline for their applications.
+
+Here's a high-level overview of the CI/CD process in AWS:
+
+1. Continuous Integration (CI): Developers frequently integrate their code changes into a shared repository, which triggers an automated build process. AWS provides services like AWS CodeCommit, a fully managed source control service, and AWS CodeBuild, a fully managed build service, to facilitate this step. CodeCommit allows teams to store and version their code, while CodeBuild compiles the code and generates build artifacts.
+
+2. Continuous Delivery (CD): After successful builds, the next step is to automate the delivery of these build artifacts to various environments, such as development, staging, and production. AWS provides services like AWS CodeDeploy and AWS Elastic Beanstalk for this purpose. CodeDeploy allows you to deploy applications to EC2 instances, on-premises servers, or services like AWS Fargate and Lambda. Elastic Beanstalk is a platform-as-a-service (PaaS) offering that simplifies the deployment and management of applications on AWS.
+
+3. Continuous Deployment: In some cases, organizations may choose to fully automate the deployment process to production, known as continuous deployment. This means that successful builds are automatically deployed to the production environment without manual intervention. AWS services like AWS CodePipeline and AWS Elastic Beanstalk can help enable continuous deployment scenarios.
+
+4. Testing and Quality Assurance: Throughout the CI/CD pipeline, it's crucial to include automated testing to ensure the quality of the software. AWS provides services like AWS CodePipeline and AWS CodeBuild, which can be integrated with popular testing frameworks, such as Selenium, JUnit, or other custom testing scripts.
+
+By implementing CI/CD in AWS, developers can reduce manual effort, improve software quality, increase deployment frequency, and enhance the overall efficiency of their application delivery processes.
+
+
+## CFN CI/CD
+
+**CFN CI/CD** refers to Continuous Integration and Continuous Deployment/Continuous Delivery in the context of AWS CloudFormation (CFN). AWS CloudFormation is a service that allows you to define and provision infrastructure resources and applications in a declarative manner using templates.
+
+CFN CI/CD involves automating the process of deploying and updating AWS CloudFormation stacks as part of a continuous integration and deployment pipeline. This enables developers to automate the deployment of infrastructure changes, manage versioning, and ensure consistency and repeatability in the deployment process.
+
+Here's a high-level overview of CFN CI/CD process:
+
+1. Continuous Integration (CI): Developers frequently integrate changes to their CloudFormation templates into a version control system, such as Git. This triggers an automated CI process that includes steps like template validation, linting, and unit testing. Tools like AWS CloudFormation Linter or third-party tools can be used to perform these checks. The CI process ensures that the CloudFormation templates are syntactically correct, follow best practices, and meet the required standards.
+
+2. Continuous Deployment (CD): Once the CI process is successful, the next step is to automate the deployment of CloudFormation stacks. This involves using tools like AWS CloudFormation CLI, AWS CloudFormation APIs, or AWS SDKs to interact with AWS CloudFormation service. Deployment scripts or infrastructure-as-code (IaC) frameworks like AWS CDK (Cloud Development Kit) or AWS SAM (Serverless Application Model) can be utilized to simplify the deployment process.
+
+3. Pipeline Orchestration: To establish a CI/CD pipeline for CFN, developers can leverage AWS services like AWS CodePipeline or other third-party tools. These tools allow you to define and configure the stages of your pipeline, such as source code integration, build, testing, and deployment. Each stage can include actions that interact with CFN, such as template validation, stack creation, stack update, or stack deletion.
+
+4. Testing and Validation: It's important to include automated testing and validation as part of the CI/CD process for CFN. This can involve integration tests, infrastructure tests, or any custom testing scripts to ensure the correctness and stability of the deployed infrastructure.
+
+By implementing CFN CI/CD, developers can automate the deployment and management of their infrastructure as code, streamline the delivery process, ensure consistency across environments, and reduce manual effort and potential errors.
+
+
+### CFN CI/CD Template
+
+![CFN CI/CD](assets/week-10/Cruddur-Network-Cluster-RDS-Service-DynamoDB-CICD.png)
+
+Lucidchart link [here](https://lucid.app/lucidchart/ccd27137-c6b2-4dcc-856b-00bdb6a86bb7/edit?viewport_loc=1147%2C-745%2C2219%2C1040%2C0_0&invitationId=inv_e02bab1e-d405-4921-aa59-b591af1bfd62)
+
+See the template [here](../aws/cfn/cicd/template.yaml)
+
+This CloudFormation (CFN) template sets up a CI/CD pipeline for deploying an application using **AWS CodeStar Connection**, **AWS CodePipeline**, **AWS CodeBuild**, and **AWS Elastic Container Service (ECS)**. Let's break down the different components and resources defined in the template:
+
+- The `AWSTemplateFormatVersion` specifies the version of the CloudFormation template syntax.
+- The `Description` provides a brief explanation of the purpose of the template and the services it uses.
+- The `Parameters` section defines input parameters that can be customized when deploying the stack. It includes parameters like `GitHubBranch`, `GithubRepo`, `ClusterStack`, `ServiceStack`, and `ArtifactBucketName`.
+- The `Resources` section contains the main resources defined in the template:
+  - `CodeBuildBakeImageStack`: This resource creates a nested CloudFormation stack by referencing an external `codebuild.yaml` template. It deploys a CodeBuild project responsible for building container images.
+  - `CodeStarConnection`: This resource sets up an **AWS CodeStar** Connection, which establishes a connection to a GitHub repository. The `ProviderType` is set to GitHub.
+  - `Pipeline`: This resource defines an **AWS CodePipeline**, which orchestrates the CI/CD process. It has stages named "Source," "Build," and "Deploy." Each stage has actions that perform specific tasks like pulling source code, building the application, and deploying to ECS.
+  - `CodePipelineRole`: This resource creates an IAM role for the CodePipeline with policies that grant permissions for ECS, CodeStar Connections, CodePipeline, S3, CloudFormation, and IAM.
+
+The template also defines multiple policies (`CodeStarPolicy`, `CodePipelinePolicy`, `CodePipelineBuildPolicy`, and `EcsDeployPolicy`) associated with the `CodePipelineRole`, which specify the permissions required for the pipeline to interact with the different AWS services involved in the CI/CD process.
+
+Overall, this CloudFormation template sets up a CI/CD pipeline that integrates with a GitHub repository, performs build operations using CodeBuild, and deploys the application to ECS using CodePipeline. The template creates the necessary resources and establishes the required permissions for the pipeline to function.
+
+**Deploy CI/CD CFN Template**
+
+Run the script below to deploy the `CFN CI/CD template`
+
+```sh
+./bin/cfn/cicd-deploy
+```
+
+CFN CI/CD Changesets
+
+![CFN CI/CD](assets/week-10/cfn-cicd-layer-changesets.png)
+
+## CFN Static Website Hosting Frontend
+
+![CFN Frontend CloudFront](assets/week-10/Cruddur-Network-Cluster-RDS-Service-DynamoDB-CICD-Frontend.png)
+
+See link [here](https://lucid.app/lucidchart/e410288c-c382-465f-8d1b-f1c3f5737e4a/edit?viewport_loc=375%2C-1913%2C2219%2C1043%2C0_0&invitationId=inv_7776d93b-e8f5-4916-ac38-004b91820021)
+
+See the CFN template [here](../aws/cfn/frontend/template.yaml)
+
+This CloudFormation (CFN) template sets up a static website hosting infrastructure on AWS. It creates an Amazon S3 bucket for the root domain and a separate bucket for the "www" subdomain. The template also provisions an Amazon CloudFront distribution to serve the static content with SSL/TLS encryption.
+
+Let's break down the different components and resources defined in the template:
+
+- The `AWSTemplateFormatVersion` specifies the version of the CloudFormation template syntax.
+- The `Description` provides a brief explanation of the purpose of the template and the services it uses.
+- The `Parameters` section defines input parameters that can be customized when deploying the stack. It includes parameters like `CertificateArn`, `WwwBucketName`, and `RootBucketName`.
+- The `Resources` section contains the main resources defined in the template:
+  - `RootBucketPolicy`: This resource creates an S3 bucket policy for the root bucket. It allows public read access (`s3:GetObject`) to all objects within the bucket.
+  - `WWWBucket`: This resource creates an S3 bucket for the "www" subdomain. The bucket name is specified by the `WwwBucketName` parameter. It also configures a website redirect rule that redirects all requests to the root domain specified by the `RootBucketName` parameter.
+  - `RootBucket`: This resource creates an S3 bucket for the root domain. The bucket name is specified by the `RootBucketName` parameter. It enables public access to the bucket content, sets the index and error documents, and configures the website hosting properties.
+  - `RootBucketDomain`: This resource creates a Route 53 record set for the root domain. It associates the root domain name with the CloudFront distribution using an Alias record.
+  - `WwwBucketDomain`: This resource creates a Route 53 record set for the "www" subdomain. It associates the "www" subdomain name with the CloudFront distribution using an Alias record.
+  - `Distribution`: This resource creates an Amazon CloudFront distribution. It specifies the aliases (root domain and "www" subdomain), enables HTTP/2 and HTTP/3, sets the default root object, defines the S3 bucket as the origin, configures cache behavior, and sets up SSL/TLS using an ACM certificate specified by the `CertificateArn` parameter.
+
+Overall, this CloudFormation template sets up a static website hosting infrastructure with separate S3 buckets for the root domain and the "www" subdomain. It leverages CloudFront as a content delivery network to provide secure and high-performance delivery of the static content. The Route 53 record sets associate the domain names with the CloudFront distribution, allowing users to access the website using both the root domain and the "www" subdomain.
+
+**Provision/Deploy the Cloud distribution infrastructure**
+
+```sh
+./bin/cfn/frontend-deploy 
+```
+
+CFN Frontend changesets
+
+![CFN Frontend](assets/week-10/cfn-static-website-hosting.png)
