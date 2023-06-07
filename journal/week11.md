@@ -1032,3 +1032,38 @@ Run the script below to deploy the `CFN CI/CD template`
 CFN CI/CD Changesets
 
 ![CFN CI/CD](assets/week-10/cfn-cicd-layer-changesets.png)
+
+## CFN Static Website Hosting Frontend
+
+![CFN Frontend CloudFront](assets/week-10/Cruddur-Network-Cluster-RDS-Service-DynamoDB-CICD-Frontend.png)
+
+See link [here](https://lucid.app/lucidchart/e410288c-c382-465f-8d1b-f1c3f5737e4a/edit?viewport_loc=375%2C-1913%2C2219%2C1043%2C0_0&invitationId=inv_7776d93b-e8f5-4916-ac38-004b91820021)
+
+See the CFN template [here](../aws/cfn/frontend/template.yaml)
+
+This CloudFormation (CFN) template sets up a static website hosting infrastructure on AWS. It creates an Amazon S3 bucket for the root domain and a separate bucket for the "www" subdomain. The template also provisions an Amazon CloudFront distribution to serve the static content with SSL/TLS encryption.
+
+Let's break down the different components and resources defined in the template:
+
+- The `AWSTemplateFormatVersion` specifies the version of the CloudFormation template syntax.
+- The `Description` provides a brief explanation of the purpose of the template and the services it uses.
+- The `Parameters` section defines input parameters that can be customized when deploying the stack. It includes parameters like `CertificateArn`, `WwwBucketName`, and `RootBucketName`.
+- The `Resources` section contains the main resources defined in the template:
+  - `RootBucketPolicy`: This resource creates an S3 bucket policy for the root bucket. It allows public read access (`s3:GetObject`) to all objects within the bucket.
+  - `WWWBucket`: This resource creates an S3 bucket for the "www" subdomain. The bucket name is specified by the `WwwBucketName` parameter. It also configures a website redirect rule that redirects all requests to the root domain specified by the `RootBucketName` parameter.
+  - `RootBucket`: This resource creates an S3 bucket for the root domain. The bucket name is specified by the `RootBucketName` parameter. It enables public access to the bucket content, sets the index and error documents, and configures the website hosting properties.
+  - `RootBucketDomain`: This resource creates a Route 53 record set for the root domain. It associates the root domain name with the CloudFront distribution using an Alias record.
+  - `WwwBucketDomain`: This resource creates a Route 53 record set for the "www" subdomain. It associates the "www" subdomain name with the CloudFront distribution using an Alias record.
+  - `Distribution`: This resource creates an Amazon CloudFront distribution. It specifies the aliases (root domain and "www" subdomain), enables HTTP/2 and HTTP/3, sets the default root object, defines the S3 bucket as the origin, configures cache behavior, and sets up SSL/TLS using an ACM certificate specified by the `CertificateArn` parameter.
+
+Overall, this CloudFormation template sets up a static website hosting infrastructure with separate S3 buckets for the root domain and the "www" subdomain. It leverages CloudFront as a content delivery network to provide secure and high-performance delivery of the static content. The Route 53 record sets associate the domain names with the CloudFront distribution, allowing users to access the website using both the root domain and the "www" subdomain.
+
+**Provision/Deploy the Cloud distribution infrastructure**
+
+```sh
+./bin/cfn/frontend-deploy 
+```
+
+CFN Frontend changesets
+
+![CFN Frontend](assets/week-10/cfn-static-website-hosting.png)
