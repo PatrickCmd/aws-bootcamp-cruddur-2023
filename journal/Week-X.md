@@ -1,5 +1,7 @@
 # Snyc tool for static website hosting
 
+**Resource video**: [Wee X Sync tool for static website hosting](https://www.youtube.com/watch?v=0nDBqZGu4rI&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=115)
+
 Follow the instructions [here](https://github.com/teacherseat/aws-s3-website-sync) on how to install the **AWS S3 Website Sync** tool and use it to sync the directory for static webhosting with **AWS S3**
 
 ## Create Gemfile and install
@@ -52,4 +54,14 @@ Now run static build and sync to AWS S3 and follow the prompts to complete the s
 
 ```sh
 ./bin/frontend/sync
+```
+
+## Create GithubOidc Identity Provider and Cruddur Sync Role
+
+See cloudformation template [here](../aws/cfn/sync/template.yaml)
+
+To create provider and role, run the deploy script as below
+
+```sh
+./bin/cfn/sync-deploy
 ```
