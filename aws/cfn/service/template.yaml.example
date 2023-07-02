@@ -164,8 +164,6 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: !Ref ServiceName
           Environment:
-            - Name: DDB_MESSAGE_TABLE
-              Value: !Ref DDBMessageTable
             - Name: "OTEL_SERVICE_NAME"
               Value: !Ref EnvOtelServiceName
             - Name: "OTEL_EXPORTER_OTLP_ENDPOINT"
@@ -208,54 +206,53 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Sid: "VisualEditor0"
-                Effect: "Allow"
+              - Sid: 'VisualEditor0'
+                Effect: 'Allow'
                 Action:
-                  - "ecr:GetAuthorizationToken"
-                  - "ecr:BatchCheckLayerAvailability"
-                  - "ecr:GetDownloadUrlForLayer"
-                  - "ecr:BatchGetImage"
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                Resource: "*"
-              - Sid: "VisualEditor1"
-                Effect: "Allow"
+                  - 'ecr:GetAuthorizationToken'
+                  - 'ecr:BatchCheckLayerAvailability'
+                  - 'ecr:GetDownloadUrlForLayer'
+                  - 'ecr:BatchGetImage'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+              - Sid: 'VisualEditor1'
+                Effect: 'Allow'
                 Action:
-                  - "ssm:GetParameters"
-                  - "ssm:GetParameter"
-                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cruddur/${ServiceName}/*"
+                  - 'ssm:GetParameters'
+                  - 'ssm:GetParameter'
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cruddur/${ServiceName}/*'
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/CloudWatchFullAccess
-        # - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
   TaskRole:
     # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
     Type: AWS::IAM::Role
     Properties:
       RoleName: CruddurServiceTaskRole
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: 'Allow'
             Principal:
-              Service: "ecs-tasks.amazonaws.com"
-            Action: "sts:AssumeRole"
+              Service: 'ecs-tasks.amazonaws.com'
+            Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: "cruddur-task-policy"
+        - PolicyName: 'cruddur-task-policy'
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
-              - Sid: "VisualEditor0"
-                Effect: "Allow"
+              - Sid: 'VisualEditor0'
+                Effect: 'Allow'
                 Action:
                   - ssmmessages:CreateControlChannel
                   - ssmmessages:CreateDataChannel
                   - ssmmessages:OpenControlChannel
                   - ssmmessages:OpenDataChannel
-                Resource: "*"
+                Resource: '*'
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/CloudWatchFullAccess
-        # - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+
 Outputs:
   ServiceName:
     Value: !GetAtt FargateService.Name
