@@ -221,30 +221,33 @@ def data_create_message():
         return model["data"], 200
 
 
+def default_home_feed(e):
+    # unauthenicatied request
+    app.logger.debug(e)
+    app.logger.debug("unauthenicated")
+    data = HomeActivities.run(logger=LOGGER)
+    return data
+
+
 @app.route("/api/activities/home", methods=["GET"])
+# @authentication_required: TODO: Have decorator work for home endpoint
 def data_home():
-    # Todo: Remove this try exception block
     try:
-        # claims = cognito_jwt_token.verify(access_token)
         claims = g.cognito_claims
         # authenicatied request
         data = HomeActivities.run(logger=LOGGER, cognito_user_id=claims["username"])
     except AttributeError as e:
-        # unauthenicatied request
-        app.logger.debug(e)
-        data = HomeActivities.run(logger=LOGGER)
+        data = default_home_feed(e)
     return data, 200
 
 
 @app.route("/api/activities/notifications", methods=["GET"])
-@authentication_required
 def data_notifications():
     data = NotificationActivities.run()
     return data, 200
 
 
 @app.route("/api/activities/@<string:handle>", methods=["GET"])
-@authentication_required
 def data_handle(handle):
     model = UserActivities.run(handle)
     if model["errors"] is not None:
@@ -254,7 +257,6 @@ def data_handle(handle):
 
 
 @app.route("/api/activities/search", methods=["GET"])
-@authentication_required
 def data_search():
     term = request.args.get("term")
     model = SearchActivities.run(term)
