@@ -7,5 +7,5 @@ stack_name = 'CruddurCiCd'
 ServiceStack = 'CrudderSrvBackendFlask'
 ClusterStack = 'CrudderCluster'
 GitHubBranch = 'prod'
-GithubRepo = 'aws-bootcamp-cruddur-2023'
+GithubRepo = 'PatrickCmd/aws-bootcamp-cruddur-2023'
 ArtifactBucketName = "codepipeline-cruddur-artifacts-cmd-1001"
