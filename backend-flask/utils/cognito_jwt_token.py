@@ -1,14 +1,14 @@
+import json
 import os
 import time
-import requests
+from functools import partial, wraps
+
 import boto3
-import json
-from functools import wraps, partial
+import requests
+from flask import abort, current_app, g, jsonify, make_response, request
 from jose import jwk, jwt
 from jose.exceptions import JOSEError
 from jose.utils import base64url_decode
-from flask import abort, request, make_response, jsonify, g, current_app
-
 from utils.exceptions import FlaskAWSCognitoError, TokenVerifyError
 
 
@@ -153,7 +153,10 @@ def token_service_factory(user_pool_id, user_pool_client_id, region):
     return CognitoJwtToken(user_pool_id, user_pool_client_id, region)
 
 
-def authentication_required(view):
+def authentication_required(view=None, on_error=None):
+    if view is None:
+        return partial(authentication_required, on_error=on_error)
+
     @wraps(view)
     def decorated(*args, **kwargs):
         access_token = extract_access_token(request.headers)
@@ -175,6 +178,8 @@ def authentication_required(view):
             # unauthenticated request
             _ = request.data
             current_app.logger.debug(e)
+            if on_error:
+                return on_error(e)
             abort(make_response(jsonify(message=str(e)), 401))
 
         return view(*args, **kwargs)
