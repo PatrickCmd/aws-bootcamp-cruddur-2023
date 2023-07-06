@@ -12,7 +12,6 @@ exclude = '''
   | buck-out
   | build
   | dist
-  | migrations
   | thumbing-serverless-cdk
   | node_modules
 )/

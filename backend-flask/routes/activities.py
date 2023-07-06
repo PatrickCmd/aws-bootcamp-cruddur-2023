@@ -64,6 +64,5 @@ def load(app, LOGGER):
         current_user = g.current_user
         user_handle = current_user.get("preferred_username")
         message = request.json["message"]
-        ttl = request.json["ttl"]
-        model = CreateReply.run(message, user_handle, ttl)
+        model = CreateReply.run(message, user_handle, activity_uuid)
         return model_json(model)
