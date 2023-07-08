@@ -3,6 +3,7 @@ from flask import g, request
 from flask_cors import cross_origin
 from services.update_profile import UpdateProfile
 from services.user_activities import UserActivities
+from services.show_activity import ShowActivity
 from services.users_short import UsersShort
 from utils.cognito_jwt_token import authentication_required
 from utils.helpers import model_json
@@ -10,7 +11,7 @@ from utils.helpers import model_json
 
 def load(app, LOGGER):
     @app.route("/api/activities/@<string:handle>", methods=["GET"])
-    def data_handle(handle):
+    def data_users_activities(handle):
         model = UserActivities.run(handle)
         return model_json(model)
 
@@ -18,6 +19,12 @@ def load(app, LOGGER):
     def data_users_short(handle):
         """Get user profile details"""
         data = UsersShort.run(handle)
+        return data, 200
+    
+    @app.route("/api/activities/@<string:handle>/status/<string:activity_uuid>", methods=['GET'])
+    @xray_recorder.capture("activities_show")
+    def data_show_activity(activity_uuid):
+        data = ShowActivity.run(activity_uuid=activity_uuid)
         return data, 200
 
     @app.route("/api/profile/update", methods=["POST", "OPTIONS"])

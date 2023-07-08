@@ -6,7 +6,6 @@ from services.create_reply import *
 from services.home_activities import *
 from services.notification_activities import *
 from services.search_activities import *
-from services.show_activity import *
 from utils.cognito_jwt_token import authentication_required
 from utils.helpers import model_json
 
@@ -48,12 +47,6 @@ def load(app, LOGGER):
         ttl = request.json["ttl"]
         model = CreateActivity.run(message, user_handle, ttl)
         return model_json(model)
-
-    @app.route("/api/activities/<string:activity_uuid>", methods=["GET"])
-    @xray_recorder.capture("activities_show")
-    def data_show_activity(activity_uuid):
-        data = ShowActivity.run(activity_uuid=activity_uuid)
-        return data, 200
 
     @app.route(
         "/api/activities/<string:activity_uuid>/reply", methods=["POST", "OPTIONS"]
