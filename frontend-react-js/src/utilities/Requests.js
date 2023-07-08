@@ -58,6 +58,7 @@ export function put(url, payload_data, options) {
 }
 
 export function get(url, options) {
+    console.log(`url: ${url}   options: ${options}`);
     request('GET', url, null, options)
 }
 
