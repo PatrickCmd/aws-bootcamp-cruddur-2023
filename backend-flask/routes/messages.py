@@ -14,7 +14,6 @@ def load(app, LOGGER):
     def data_message_groups():
         claims = g.cognito_claims
         cognito_user_id = claims["sub"]
-        current_user = g.current_user
 
         model = MessageGroups.run(cognito_user_id=cognito_user_id)
         return model_json(model)
@@ -38,7 +37,7 @@ def load(app, LOGGER):
         message = request.json["message"]
 
         claims = g.cognito_claims
-        current_user = g.current_user
+        # current_user = g.current_user
         cognito_user_id = claims["sub"]
 
         if message_group_uuid == None:
@@ -47,7 +46,6 @@ def load(app, LOGGER):
                 mode="create",
                 message=message,
                 cognito_user_id=cognito_user_id,
-                current_user=current_user,
                 user_receiver_handle=user_receiver_handle,
             )
         else:
@@ -57,7 +55,6 @@ def load(app, LOGGER):
                 message=message,
                 message_group_uuid=message_group_uuid,
                 cognito_user_id=cognito_user_id,
-                current_user=current_user,
             )
 
         return model_json(model)

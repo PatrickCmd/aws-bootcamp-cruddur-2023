@@ -5,7 +5,7 @@ import routes.activities
 import routes.general
 import routes.messages
 import routes.users
-from flask import Flask,g
+from flask import Flask, g
 from utils.cloudwatch import init_cloudwatch
 from utils.cors import init_cors
 from utils.helpers import model_json

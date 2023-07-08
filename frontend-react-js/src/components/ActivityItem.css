@@ -66,6 +66,7 @@
   fill: rgb(149, 0, 255);
 }
 
+
 .activity_item.expanded .activity_content {
   display: flex;
 }

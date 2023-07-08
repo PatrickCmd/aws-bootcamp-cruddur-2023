@@ -10,7 +10,6 @@ class CreateMessage:
         mode,
         message,
         cognito_user_id,
-        current_user,
         message_group_uuid=None,
         user_receiver_handle=None,
     ):
@@ -35,7 +34,7 @@ class CreateMessage:
         if model["errors"]:
             # return what we provided
             model["data"] = {
-                "display_name": current_user.get("name"),
+                # "display_name": current_user.get("name"),
                 "handle": user_sender_handle,
                 "message": message,
             }

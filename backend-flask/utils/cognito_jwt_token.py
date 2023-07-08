@@ -20,6 +20,11 @@ def extract_access_token(request_headers):
     return access_token
 
 
+def extract_current_user(request_headers):
+    current_user = request_headers.get("CurrentUser")
+    return json.loads(current_user)
+
+
 class CognitoJwtToken:
     def __init__(self, user_pool_id, user_pool_client_id, region, request_client=None):
         self.region = region
@@ -146,7 +151,7 @@ class CognitoJwtToken:
             return dict_user
         except Exception as e:
             current_app.logger.debug(f"Error: {e}")
-            return {}
+            return extract_current_user(request.headers)
 
 
 def token_service_factory(user_pool_id, user_pool_client_id, region):
@@ -169,9 +174,11 @@ def authentication_required(view=None, on_error=None):
             )
             claims = token_service.verify(access_token)
             g.cognito_claims = claims
+            print(f"claims: ===========> {claims}")
 
             # current user
             current_user = token_service.get_user_info(access_token)
+            print(f"current user:  =========> {current_user}")
             if current_user:
                 g.current_user = current_user
         except TokenVerifyError as e:

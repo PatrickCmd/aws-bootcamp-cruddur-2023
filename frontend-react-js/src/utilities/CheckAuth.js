@@ -23,6 +23,13 @@ export async function checkAuth(setUser) {
         display_name: cognito_user.attributes.name,
         handle: cognito_user.attributes.preferred_username
       })
+      const current_user = {
+        "sub": cognito_user.attributes.sub,
+        "name": cognito_user.attributes.name,
+        "preferred_username": cognito_user.attributes.preferred_username,
+        "email": cognito_user.attributes.email
+      }
+      localStorage.setItem("current_user", JSON.stringify(current_user))
       return Auth.currentSession()  // current session with refreshed access token.
     }).then((cognito_user_session) => {
       localStorage.setItem("access_token", cognito_user_session.accessToken.jwtToken)

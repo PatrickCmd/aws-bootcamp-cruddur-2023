@@ -17,7 +17,9 @@ async function request(method, url, payload_data, options) {
         if (options.hasOwnProperty('auth') && options.auth === true) {
             await getAccessToken()
             const access_token = localStorage.getItem("access_token")
+            const current_user = localStorage.getItem("current_user")
             attrs.headers['Authorization'] = `Bearer ${access_token}`
+            attrs.headers['CurrentUser'] = current_user
         }
 
         if (method !== 'GET') {

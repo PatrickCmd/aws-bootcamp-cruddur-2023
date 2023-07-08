@@ -1,5 +1,6 @@
 from flask import g
 
+
 def load(app):
     @app.route("/api/health-check")
     def health_check():
