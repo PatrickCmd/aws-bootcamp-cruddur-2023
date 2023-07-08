@@ -5,13 +5,13 @@ import routes.activities
 import routes.general
 import routes.messages
 import routes.users
-from flask import Flask
+from flask import Flask,g
 from utils.cloudwatch import init_cloudwatch
 from utils.cors import init_cors
 from utils.helpers import model_json
 from utils.honeycomb import init_honeycomb
 from utils.logging_config import configure_logging
-from utils.rollbar import init_rollbar as rollbar
+from utils.rollbar import init_rollbar
 from utils.xray import init_xray
 
 # Configuring Logger
@@ -21,9 +21,11 @@ app = Flask(__name__)
 
 # Honeycomb
 init_honeycomb(app)
-
 # AWS X-RAY
 init_xray(app)
+# Rollbar
+with app.app_context():
+    g.rollbar = init_rollbar(app)
 
 # CORS
 init_cors(app)
@@ -31,23 +33,10 @@ database_url = os.getenv("DATABASE_URL")
 conn = psycopg.connect(database_url)
 
 
-@app.after_request
-def after_request(response):
-    init_cloudwatch(response, LOGGER)
-    return response
-
-
-# Rollbar
-@app.before_first_request
-def init_rollbar():
-    """init rollbar module"""
-    rollbar()
-
-
-@app.route("/rollbar/test")
-def rollbar_test():
-    rollbar().report_message("Rollbar Testing!", "warning")
-    return "Rollbar Testing!"
+# @app.after_request
+# def after_request(response):
+#     init_cloudwatch(response, LOGGER)
+#     return response
 
 
 # load routes

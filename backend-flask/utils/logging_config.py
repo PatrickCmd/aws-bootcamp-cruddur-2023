@@ -14,7 +14,7 @@ def configure_logging():
     console_handler.setLevel(logging.DEBUG)
 
     # Configuring Logger to Use CloudWatch
-    cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
+    # cw_handler = watchtower.CloudWatchLogHandler(log_group="cruddur-backend-flask")
 
     # Create formatter
     formatter = logging.Formatter(
@@ -24,7 +24,7 @@ def configure_logging():
 
     # Add console handler to logger
     LOGGER.addHandler(console_handler)
-    LOGGER.addHandler(cw_handler)
-    LOGGER.info("Test CloudWatch Logs!")
+    # LOGGER.addHandler(cw_handler)
+    # LOGGER.info("Test CloudWatch Logs!")
 
     return LOGGER

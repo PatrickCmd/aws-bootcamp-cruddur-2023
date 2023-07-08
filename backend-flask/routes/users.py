@@ -1,9 +1,9 @@
 from aws_xray_sdk.core import xray_recorder
 from flask import g, request
 from flask_cors import cross_origin
+from services.show_activity import ShowActivity
 from services.update_profile import UpdateProfile
 from services.user_activities import UserActivities
-from services.show_activity import ShowActivity
 from services.users_short import UsersShort
 from utils.cognito_jwt_token import authentication_required
 from utils.helpers import model_json
@@ -20,8 +20,11 @@ def load(app, LOGGER):
         """Get user profile details"""
         data = UsersShort.run(handle)
         return data, 200
-    
-    @app.route("/api/activities/@<string:handle>/status/<string:activity_uuid>", methods=['GET'])
+
+    @app.route(
+        "/api/activities/@<string:handle>/status/<string:activity_uuid>",
+        methods=["GET"],
+    )
     @xray_recorder.capture("activities_show")
     def data_show_activity(activity_uuid):
         data = ShowActivity.run(activity_uuid=activity_uuid)
