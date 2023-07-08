@@ -1,24 +1,23 @@
 .activity_item {
   display: flex;
   flex-direction: column;
-  border-bottom: solid 1px rgb(60, 54, 79);
+  border-bottom: solid 1px rgb(60,54,79);
   overflow: hidden;
 }
 
-a.activity_item {
-  text-decoration: none;
+.activity_item.clickable:hover {
+  cursor: pointer;
 }
 
-a.activity_item:hover {
-  background: rgba(255, 255, 255, 0.15);
+.activity_item.clickable:hover {
+  background: rgba(255,255,255,0.15);
 }
 
 .replies {
   padding-left: 24px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.15);
 }
-
-.replies .activity_item {
+.replies .activity_item{
   background: var(--fg);
 }
 
@@ -37,7 +36,7 @@ a.activity_item:hover {
   padding-left: 60px;
 }
 
-.activity_item .activity_actions .action {
+.activity_item .activity_actions .action{
   flex-grow: 1;
   cursor: pointer;
   padding: 8px;
@@ -47,21 +46,21 @@ a.activity_item:hover {
   gap: 12px
 }
 
-.activity_item .activity_actions .action .counter {
-  color: rgba(255, 255, 255, 0.8);
+.activity_item .activity_actions .action .counter{
+  color: rgba(255,255,255,0.8);
   font-weight: 800;
 }
 
-.activity_item .activity_actions .icon {
+.activity_item .activity_actions .icon{
   height: 18px;
   width: 18px;
   fill: #fff;
 }
 
 .activity_item .activity_actions .action:hover {
-  background: rgba(149, 0, 255, 0.2);
+  background: rgba(149,0,255,0.2);
 }
 
 .activity_item .activity_actions .action:hover .icon {
-  fill: rgb(149, 0, 255);
+  fill: rgb(149,0,255);
 }
