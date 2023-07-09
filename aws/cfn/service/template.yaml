@@ -68,6 +68,9 @@ Parameters:
   SecretsOtelExporterOltpHeaders:
     Type: String
     Default: "arn:aws:ssm:us-east-1:476313879638:parameter/cruddur/backend-flask/OTEL_EXPORTER_OTLP_HEADERS"
+  DDBMessageTable:
+    Type: String
+    Default: cruddur-messages
 
 Resources:
   FargateService:
@@ -161,6 +164,8 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: !Ref ServiceName
           Environment:
+            - Name: DDB_MESSAGE_TABLE
+              Value: !Ref DDBMessageTable
             - Name: "OTEL_SERVICE_NAME"
               Value: !Ref EnvOtelServiceName
             - Name: "OTEL_EXPORTER_OTLP_ENDPOINT"
@@ -220,7 +225,8 @@ Resources:
                   - "ssm:GetParameter"
                 Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cruddur/${ServiceName}/*"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        # - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
   TaskRole:
     # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
     Type: AWS::IAM::Role
@@ -247,9 +253,9 @@ Resources:
                   - ssmmessages:OpenDataChannel
                 Resource: "*"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        # - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
-
 Outputs:
   ServiceName:
     Value: !GetAtt FargateService.Name

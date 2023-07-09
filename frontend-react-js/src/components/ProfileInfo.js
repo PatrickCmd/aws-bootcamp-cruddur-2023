@@ -17,6 +17,7 @@ export default function ProfileInfo(props) {
       await Auth.signOut({ global: true });
       // clear access token on signout
       localStorage.removeItem("access_token")
+      localStorage.removeItem("current_user")
       window.location.href = "/"
     } catch (error) {
       console.log('error signing out: ', error);
@@ -25,7 +26,7 @@ export default function ProfileInfo(props) {
 
   const classes = () => {
     let classes = ["profile-info-wrapper"];
-    if (popped == true) {
+    if (popped === true) {
       classes.push('popped');
     }
     return classes.join(' ');

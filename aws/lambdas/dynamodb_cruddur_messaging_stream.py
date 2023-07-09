@@ -1,6 +1,7 @@
 import json
+
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Attr, Key
 
 dynamodb = boto3.resource(
     "dynamodb",

@@ -60,6 +60,7 @@ tasks:
   - name: cfn
     before: |
       cd ${THEIA_WORKSPACE_ROOT}
+      bundle update --bundler
       pip install cfn-lint
       curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/aws-cloudformation/cloudformation-guard/main/install-guard.sh | sh
       export PATH=~/.guard/bin:$PATH
