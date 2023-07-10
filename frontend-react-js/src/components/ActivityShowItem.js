@@ -1,12 +1,12 @@
 import './ActivityItem.css';
 
-import ActivityActionReply from '../components/ActivityActionReply';
-import ActivityActionRepost from '../components/ActivityActionRepost';
-import ActivityActionLike from '../components/ActivityActionLike';
-import ActivityActionShare from '../components/ActivityActionShare';
+import ActivityActionReply from 'components/ActivityActionReply';
+import ActivityActionRepost from 'components/ActivityActionRepost';
+import ActivityActionLike from 'components/ActivityActionLike';
+import ActivityActionShare from 'components/ActivityActionShare';
 
 import { Link } from "react-router-dom";
-import { format_datetime, time_ago, time_future } from '../utilities/DateTimeFormats';
+import { format_datetime, time_ago, time_future } from 'utilities/DateTimeFormats';
 import { ReactComponent as BombIcon } from './svg/bomb.svg';
 
 export default function ActivityShowItem(props) {
@@ -34,12 +34,12 @@ export default function ActivityShowItem(props) {
                                 </div>
                             </div>{/* activity_times */}
                         </div>{/* activity_meta */}
+                        <div className="message">{props.activity.message}</div>
                     </div>{/* activity_content */}
-                    <div className="message">{props.activity.message}</div>
                 </div>
 
                 <div className='expandedMeta'>
-                    <div class="created_at">
+                    <div className="created_at">
                         {format_datetime(props.activity.created_at)}
                     </div>
                 </div>
@@ -51,5 +51,5 @@ export default function ActivityShowItem(props) {
                 </div>
             </div>
         </div>
-    )
+    );
 }

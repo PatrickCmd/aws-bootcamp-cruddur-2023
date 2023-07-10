@@ -26,11 +26,11 @@ def load(app, LOGGER):
         methods=["GET"],
     )
     @xray_recorder.capture("activities_show")
-    def data_show_activity(activity_uuid):
+    def data_show_activity(handle, activity_uuid):
         data = ShowActivity.run(activity_uuid=activity_uuid)
         return data, 200
 
-    @app.route("/api/profile/update", methods=["POST", "OPTIONS"])
+    @app.route("/api/profile/update", methods=["PUT", "OPTIONS"])
     @cross_origin()
     @authentication_required
     def data_update_profile():
