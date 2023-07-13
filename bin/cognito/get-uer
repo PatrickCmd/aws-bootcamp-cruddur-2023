@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import boto3
-import os
 import json
+import os
+
+import boto3
 
 # Move access token to a separate variable or configuration file
 access_token = os.environ.get("ACCESS_TOKEN")

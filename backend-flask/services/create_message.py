@@ -10,7 +10,6 @@ class CreateMessage:
         mode,
         message,
         cognito_user_id,
-        current_user,
         message_group_uuid=None,
         user_receiver_handle=None,
     ):
@@ -30,12 +29,12 @@ class CreateMessage:
         if message == None or len(message) < 1:
             model["errors"] = ["message_blank"]
         elif len(message) > 1024:
-            model["errors"] = ["message_exceed_max_chars"]
+            model["errors"] = ["message_exceed_max_chars_1024"]
 
         if model["errors"]:
             # return what we provided
             model["data"] = {
-                "display_name": current_user.get("name"),
+                # "display_name": current_user.get("name"),
                 "handle": user_sender_handle,
                 "message": message,
             }

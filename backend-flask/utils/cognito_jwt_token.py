@@ -1,14 +1,14 @@
+import json
 import os
 import time
-import requests
+from functools import partial, wraps
+
 import boto3
-import json
-from functools import wraps
+import requests
+from flask import abort, current_app, g, jsonify, make_response, request
 from jose import jwk, jwt
 from jose.exceptions import JOSEError
 from jose.utils import base64url_decode
-from flask import abort, request, make_response, jsonify, g, current_app
-
 from utils.exceptions import FlaskAWSCognitoError, TokenVerifyError
 
 
@@ -18,6 +18,11 @@ def extract_access_token(request_headers):
     if auth_header and " " in auth_header:
         _, access_token = auth_header.split()
     return access_token
+
+
+def extract_current_user(request_headers):
+    current_user = request_headers.get("CurrentUser")
+    return json.loads(current_user)
 
 
 class CognitoJwtToken:
@@ -146,14 +151,17 @@ class CognitoJwtToken:
             return dict_user
         except Exception as e:
             current_app.logger.debug(f"Error: {e}")
-            return {}
+            return extract_current_user(request.headers)
 
 
 def token_service_factory(user_pool_id, user_pool_client_id, region):
     return CognitoJwtToken(user_pool_id, user_pool_client_id, region)
 
 
-def authentication_required(view):
+def authentication_required(view=None, on_error=None):
+    if view is None:
+        return partial(authentication_required, on_error=on_error)
+
     @wraps(view)
     def decorated(*args, **kwargs):
         access_token = extract_access_token(request.headers)
@@ -166,15 +174,50 @@ def authentication_required(view):
             )
             claims = token_service.verify(access_token)
             g.cognito_claims = claims
+            print(f"claims: ===========> {claims}")
 
             # current user
             current_user = token_service.get_user_info(access_token)
+            print(f"current user:  =========> {current_user}")
             if current_user:
                 g.current_user = current_user
         except TokenVerifyError as e:
+            # unauthenticated request
             _ = request.data
+            current_app.logger.debug(e)
+            if on_error:
+                return on_error(e)
             abort(make_response(jsonify(message=str(e)), 401))
 
         return view(*args, **kwargs)
 
     return decorated
+
+
+def jwt_required(f=None, on_error=None):
+    if f is None:
+        return partial(jwt_required, on_error=on_error)
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        cognito_jwt_token = CognitoJwtToken(
+            user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"),
+            user_pool_client_id=os.getenv("AWS_COGNITO_USER_POOL_CLIENT_ID"),
+            region=os.getenv("AWS_DEFAULT_REGION"),
+        )
+        access_token = extract_access_token(request.headers)
+        try:
+            claims = cognito_jwt_token.verify(access_token)
+            # is this a bad idea using a global?
+            g.cognito_user_id = claims[
+                "sub"
+            ]  # storing the user_id in the global g object
+        except TokenVerifyError as e:
+            # unauthenticated request
+            app.logger.debug(e)
+            if on_error:
+                on_error(e)
+            return {}, 401
+        return f(*args, **kwargs)
+
+    return decorated_function

@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 from opentelemetry import trace
-
 from utils.db import db
 
 tracer = trace.get_tracer(__name__)

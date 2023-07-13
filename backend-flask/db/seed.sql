@@ -14,4 +14,15 @@ VALUES
     (SELECT uuid from public.users WHERE users.handle = 'patrickcmd' LIMIT 1),
     'This was imported as seed data!',
     current_timestamp + interval '10 day'
-  )
+  ),
+  (
+    (SELECT uuid from public.users WHERE users.handle = 'patrickcmdtelnet' LIMIT 1),
+    'I am Patrick Telnet posting about AWS cloud!',
+    current_timestamp + interval '10 day'
+  ),
+  (
+    (SELECT uuid from public.users WHERE users.handle = 'patrickcmd101' LIMIT 1),
+    'I am seeding data about AWS cloud!',
+    current_timestamp + interval '10 day'
+  );
+  
