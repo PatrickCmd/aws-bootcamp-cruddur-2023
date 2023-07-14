@@ -80,6 +80,10 @@
         {
           "name": "AWS_DEFAULT_REGION",
           "value": "us-east-1"
+        },
+        {
+          "name": "DDB_MESSAGE_TABLE",
+          "value": "CruddurdDynamoDB-DynamoDBTable-K2QAEWUJWQG8"
         }
       ],
       "secrets": [
