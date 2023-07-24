@@ -1,9 +1,9 @@
 [deploy]
 bucket = 'cfn-artifacts-cmd-1001'
 region = 'us-east-1'
-stack_name = 'CrudderSrvBackendFlask'
+stack_name = 'CrdSrvBackendFlask'
 
 [parameters]
 EnvFrontendUrl = 'https://cruddurcorecodecmdsystems.website'
 EnvBackendUrl = 'https://api.cruddurcorecodecmdsystems.website'
-DDBMessageTable = 'CruddurdDynamoDB-DynamoDBTable-K2QAEWUJWQG8'
+DDBMessageTable = 'CrdDdb-DynamoDBTable-UB5YR6ZUBYLY'

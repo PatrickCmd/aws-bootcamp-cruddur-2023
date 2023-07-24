@@ -1,7 +1,7 @@
 [deploy]
 bucket = 'cfn-artifacts-cmd-1001'
 region = 'us-east-1'
-stack_name = 'CruddurFrontend'
+stack_name = 'CrdFrontend'
 
 [parameters]
 CertificateArn = 'arn:aws:acm:us-east-1:476313879638:certificate/3ce837cd-5cbf-4f04-9a9e-c0a027d5c2d3'

@@ -1,7 +1,7 @@
 [deploy]
 bucket = 'cfn-artifacts-cmd-1001'
 region = 'us-east-1'
-stack_name = 'CrudddurSyncRole'
+stack_name = 'CrdSyncRole'
 
 [parameters]
 GitHubOrg = 'PatrickCmd'

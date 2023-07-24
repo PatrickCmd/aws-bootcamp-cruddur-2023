@@ -1,9 +1,9 @@
 [deploy]
 bucket = 'cfn-artifacts-cmd-1001'
 region = 'us-east-1'
-stack_name = 'CrudderDB'
+stack_name = 'CrdDb'
 
 [parameters]
-NetworkingStack = 'CrudderNet'
-ClusterStack = 'CrudderCluster'
-MasterUsername = 'cmdcruddurroot'
+NetworkingStack = 'CrdNet'
+ClusterStack = 'CrdCluster'
+MasterUsername = 'cruddurroot'
