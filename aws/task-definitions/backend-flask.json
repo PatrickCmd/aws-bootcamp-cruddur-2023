@@ -83,7 +83,7 @@
         },
         {
           "name": "DDB_MESSAGE_TABLE",
-          "value": "CrdDdb-DynamoDBTable-1G8YN2MJ17O1X"
+          "value": "CrdDdb-DynamoDBTable-T3EEQ2JWVSKP"
         }
       ],
       "secrets": [
